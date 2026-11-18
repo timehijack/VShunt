@@ -1,0 +1,2357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VShunt 分流 — 视频无损剪辑与素材分流，批量剪辑导出与压缩，节省存储空间</title>
+<meta name="description" content="VShunt 是 macOS 原生视频无损剪辑与素材分流工具：一条时间线完成选片、切分，片段可按原片无损复制（不重新编码）、压缩到 4K/1080p 或仅提取音频，一次批量导出后即可放心删除原片，节省硬盘空间。支持字幕识别、时间线波形、自定义转码参数与导出模板，内置 ffmpeg，下载即用。">
+<meta name="keywords" content="无损剪辑,无损剪切,视频无损剪辑,不重新编码,视频素材分流,批量剪辑,批量导出,视频压缩,提取音频,删除原片,节省硬盘空间,macOS 视频工具,ffmpeg 图形界面,字幕识别">
+<meta name="theme-color" content="#0c0c0d">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="VShunt 分流">
+<meta property="og:title" content="VShunt 分流 — 视频无损剪辑与素材分流，按需压缩、批量导出省存储">
+<meta property="og:description" content="macOS 原生无损剪辑工具：一条时间线完成选片、切分、转码与批量导出，原片直接复制不重新编码，原片即可放心删除，只为好片留空间。">
+<meta property="og:image" content="apple-touch-icon.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="VShunt 分流 — 视频无损剪辑与素材分流，按需压缩、批量导出省存储">
+<meta name="twitter:description" content="macOS 原生无损剪辑工具：一条时间线完成选片、切分、转码与批量导出，原片直接复制不重新编码，原片即可放心删除，只为好片留空间。">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<script>document.documentElement.className += ' js';</script>
+<style>
+  :root{
+    --ink:#0c0c0d;
+    --ink-2:#131314;
+    --ink-3:#19191b;
+    --line:#2a2a2d;
+    --line-soft:#202023;
+    --bone:#f1ece2;
+    --bone-dim:#a8a39a;
+    --bone-faint:#6f6b64;
+    --vermilion:#ff5a2b;
+    --vermilion-deep:#d63f16;
+    --mint:#b8e986;
+    --max:1240px;
+    --serif:"Songti SC","Noto Serif SC","Source Han Serif SC",STSong,SimSun,serif;
+    --sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--ink);color:var(--bone);
+    font-family:var(--sans);font-size:16px;line-height:1.7;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    overflow-x:hidden;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.055;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  a{color:inherit;text-decoration:none}
+  ::selection{background:var(--vermilion);color:#0c0c0d}
+  .wrap{max-width:var(--max);margin:0 auto;padding:0 28px}
+  .mono{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+  .dim{color:var(--bone-dim)}
+
+  /* ---------- nav ---------- */
+  .progress{position:fixed;top:0;left:0;height:2px;background:var(--vermilion);z-index:1001;width:0}
+  nav{
+    position:fixed;top:0;left:0;right:0;z-index:1000;
+    display:flex;align-items:center;justify-content:space-between;
+    height:64px;padding:0 28px;
+    background:rgba(12,12,13,.72);backdrop-filter:blur(14px);
+    border-bottom:1px solid transparent;transition:border-color .3s;
+  }
+  nav.scrolled{border-bottom-color:var(--line-soft)}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:13px;letter-spacing:.18em}
+  .brand .mark{width:22px;height:22px;display:block;flex:none}
+  .navlinks{display:flex;gap:30px;align-items:center}
+  .navlinks a{font-size:13px;color:var(--bone-dim);transition:color .2s}
+  .navlinks a:hover{color:var(--bone)}
+  .navlinks a.ext{display:inline-flex;align-items:center;gap:6px}
+  .navlinks a.ext svg{opacity:.7}
+  .nav-cta{
+    border:1px solid var(--line);padding:8px 16px;font-size:13px;
+    transition:background .2s,color .2s,border-color .2s;
+  }
+  .nav-cta:hover{background:var(--bone);color:var(--ink);border-color:var(--bone)}
+  .nav-toggle{display:none;width:36px;height:36px;margin-left:12px;padding:0;border:1px solid var(--line);background:none;cursor:pointer;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+  .nav-toggle span{display:block;width:16px;height:1px;background:var(--bone);transition:transform .25s}
+  nav.open .nav-toggle span:first-child{transform:translateY(3px) rotate(45deg)}
+  nav.open .nav-toggle span:last-child{transform:translateY(-3px) rotate(-45deg)}
+  @media(max-width:760px){
+    nav{padding:0 20px;gap:12px}
+    .brand{letter-spacing:.1em;white-space:nowrap}
+    .nav-cta{margin-left:auto;padding:8px 12px;font-size:12px;white-space:nowrap}
+    .nav-toggle{display:flex;margin-left:0;flex:none}
+    .navlinks{position:fixed;top:64px;left:0;right:0;flex-direction:column;align-items:stretch;gap:0;padding:8px 0 16px;background:var(--ink);border-bottom:1px solid var(--line-soft);opacity:0;visibility:hidden;transform:translateY(-8px);transition:opacity .2s,transform .2s,visibility .2s}
+    .navlinks a{padding:14px 20px;font-size:15px;border-top:1px solid var(--line-soft)}
+    .navlinks a:first-child{border-top:0}
+    nav.open .navlinks{opacity:1;visibility:visible;transform:none}
+  }
+
+  /* ---------- hero ---------- */
+  header{position:relative;padding:150px 0 90px;overflow:hidden}
+  header::after{
+    content:"";position:absolute;top:-20%;right:-10%;width:60vw;height:60vw;
+    background:radial-gradient(circle at center,rgba(255,90,43,.13),transparent 62%);
+    pointer-events:none;
+  }
+  .hero{display:grid;grid-template-columns:1.32fr .68fr;gap:64px;align-items:end;position:relative;z-index:1}
+  .eyebrow{display:flex;align-items:center;gap:12px;color:var(--bone-dim);margin-bottom:28px}
+  .eyebrow .dot{width:6px;height:6px;background:var(--mint);border-radius:50%;box-shadow:0 0 12px var(--mint)}
+  h1{
+    font-family:var(--serif);font-weight:600;
+    font-size:clamp(44px,7.2vw,92px);line-height:1.04;letter-spacing:-.02em;
+    margin:0 0 28px;
+  }
+  h1 em{font-style:normal;color:var(--vermilion)}
+  .lede{max-width:560px;font-size:17px;color:var(--bone-dim);margin:0 0 36px}
+  .actions{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .btn{
+    display:inline-flex;align-items:center;gap:10px;
+    padding:15px 26px;font-size:14px;font-weight:500;
+    background:var(--vermilion);color:#140b08;border:1px solid var(--vermilion);
+    transition:transform .2s,background .2s;
+  }
+  .btn:hover{background:#ff7147;transform:translateY(-2px)}
+  .btn.ghost{background:transparent;color:var(--bone);border-color:var(--line)}
+  .btn.ghost:hover{border-color:var(--bone);background:transparent}
+  .meta{margin-top:26px;display:flex;gap:18px;flex-wrap:wrap;color:var(--bone-faint);font-size:12px;font-family:var(--mono)}
+
+  /* hero timeline motif */
+  .reel{border:1px solid var(--line);background:linear-gradient(180deg,#111113,#0d0d0e);padding:20px 18px 16px;position:relative;overflow:hidden}
+  .reel::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 80% at 80% 0%,rgba(255,90,43,.09),transparent 62%)}
+  .reel-head{display:flex;justify-content:space-between;align-items:center;color:var(--bone-faint);margin-bottom:16px;position:relative;z-index:1}
+  .tc{font-family:var(--mono);font-size:12.5px;color:var(--vermilion);letter-spacing:.08em;min-width:92px;text-align:right;font-variant-numeric:tabular-nums}
+  .reel-stage{position:relative;height:340px;z-index:1}
+
+  .scene{position:absolute;inset:0;display:flex;flex-direction:column;transition:opacity .5s ease,transform .5s ease}
+  .scene-cut{opacity:1;transform:none}
+  .scene-pack{opacity:0;transform:translateY(10px);pointer-events:none;justify-content:center;gap:12px}
+  .reel.packing .scene-cut{opacity:0;transform:translateY(-10px);pointer-events:none}
+  .reel.packing .scene-pack{opacity:1;transform:none}
+
+  .source{position:relative}
+  .source-label{display:flex;justify-content:space-between;color:var(--bone-faint);margin-bottom:8px}
+  .source-track{height:38px;background:#17171a;position:relative;overflow:hidden;border:1px solid #232327}
+  .source-track::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,#1b1b1e 0 12px,#1f1f23 12px 16px);opacity:.9}
+  .source-track::after{content:"";position:absolute;left:0;top:0;bottom:0;width:100%;background:linear-gradient(90deg,rgba(255,90,43,.08),transparent 42%)}
+  .playhead{position:absolute;top:-5px;bottom:-5px;left:78%;width:2px;background:var(--bone);box-shadow:0 0 12px rgba(241,236,226,.55);z-index:3}
+  .playhead::before{content:"";position:absolute;top:-4px;left:50%;width:7px;height:7px;background:var(--bone);border-radius:50%;transform:translateX(-50%);box-shadow:0 0 10px var(--bone)}
+  .playhead::after{content:"";position:absolute;top:0;bottom:0;left:-6px;width:14px;background:linear-gradient(90deg,transparent,rgba(241,236,226,.18),transparent)}
+  .x-mark{position:absolute;top:50%;left:0;transform:translate(-50%,-50%) scale(1);width:20px;height:20px;border:1px solid var(--vermilion);background:#1a100c;color:var(--vermilion);font-family:var(--mono);font-size:10px;display:grid;place-items:center;z-index:2;opacity:1;transition:opacity .25s,transform .35s cubic-bezier(.2,.8,.2,1)}
+  .js .x-mark{opacity:0;transform:translate(-50%,-50%) scale(.6)}
+  .js .x-mark.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  .x-mark::after{content:"";position:absolute;inset:-5px;border:1px solid rgba(255,90,43,.35);opacity:0}
+  .js .x-mark.on::after{animation:xping .7s ease-out}
+  @keyframes xping{0%{opacity:.8;transform:scale(.7)}100%{opacity:0;transform:scale(1.6)}}
+  .ticks{display:flex;justify-content:space-between;margin-top:9px;color:#57534c;font-family:var(--mono);font-size:9.5px}
+
+  .seg-list{margin-top:18px;display:flex;flex-direction:column;gap:6px}
+  .seg-item{position:relative;display:flex;align-items:center;gap:9px;height:40px;padding:0 10px 0 13px;background:#141416;border:1px solid #26262a;opacity:1;transform:none;transition:opacity .4s ease,transform .45s cubic-bezier(.2,.8,.2,1),border-color .3s}
+  .js .seg-item{opacity:0;transform:translateY(-10px) scale(.98)}
+  .js .seg-item.on{opacity:1;transform:none}
+  .seg-item::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--bone-faint)}
+  .seg-item[data-type="master"]::before{background:var(--vermilion)}
+  .seg-item[data-type="delivery"]::before{background:var(--bone)}
+  .seg-item[data-type="uhd"]::before{background:#d8b36a}
+  .seg-item[data-type="audio"]::before{background:var(--mint)}
+  .seg-item[data-type="discard"]::before{background:#6f6b64}
+  .seg-idx{color:var(--bone-faint);font-size:9px;letter-spacing:.1em;flex:none}
+  .seg-name{font-size:12px;color:var(--bone);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .seg-name.typing::after{content:"";display:inline-block;width:1px;height:10px;background:var(--vermilion);margin-left:2px;vertical-align:-1px;animation:caretBlink .7s steps(1) infinite}
+  .seg-name.default{color:var(--bone-faint)}
+  @keyframes caretBlink{0%,49%{opacity:1}50%,100%{opacity:0}}
+  .seg-item[data-type="discard"] .seg-name{color:var(--bone-faint);text-decoration:line-through}
+  .seg-badge{position:relative;margin-left:auto;flex:none;width:76px;height:20px;perspective:220px}
+  .seg-badge .face{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8.5px;letter-spacing:.04em;border:1px solid;background:#141416;backface-visibility:hidden;transition:transform .5s cubic-bezier(.2,.8,.2,1),opacity .35s}
+  .seg-badge .front{display:none;color:var(--bone-dim);border-color:var(--bone-faint);border-style:dashed}
+  .seg-badge .back{color:var(--bone-dim);border-color:currentColor;transform:none;opacity:1}
+  .js .seg-badge .front{display:flex;transform:rotateX(0);opacity:1}
+  .js .seg-badge .back{transform:rotateX(-90deg);opacity:0}
+  .js .seg-item.on .seg-badge .front{transform:rotateX(90deg);opacity:0;transition-delay:.55s;transition-duration:.5s}
+  .js .seg-item.on .seg-badge .back{transform:rotateX(0);opacity:1;transition-delay:.55s;transition-duration:.5s}
+  .seg-item[data-type="master"] .seg-badge .back{color:var(--vermilion)}
+  .seg-item[data-type="delivery"] .seg-badge .back{color:var(--bone)}
+  .seg-item[data-type="uhd"] .seg-badge .back{color:#d8b36a}
+  .seg-item[data-type="audio"] .seg-badge .back{color:var(--mint)}
+  .seg-item[data-type="discard"] .seg-badge .back{color:#a34a35}
+
+  .slip{width:100%;background:#f1ece2;color:#17171a;border:1px solid #cfc7b8;padding:13px 13px 11px;position:relative;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.38)}
+  .slip::before{content:"";position:absolute;top:5px;left:12px;right:12px;height:1px;background:repeating-linear-gradient(90deg,#c3b9a8 0 4px,transparent 4px 8px);opacity:.8}
+  .slip-head{display:flex;justify-content:space-between;align-items:center;color:#8a8378;font-size:8px;letter-spacing:.14em;margin:4px 0 8px}
+  .slip-head span{font-size:8px;letter-spacing:.14em}
+  .slip-save{display:flex;align-items:baseline;gap:8px}
+  .save-num{font-family:var(--mono);font-size:31px;line-height:1;color:#c8421a;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+  .save-num .unit{font-size:10px;color:#7a746a;margin-left:2px;letter-spacing:.04em}
+  .save-pct{font-family:var(--mono);font-size:8.5px;background:#17171a;color:#f1ece2;padding:3px 5px;letter-spacing:.06em}
+  .save-sub{font-size:10px;color:#6f695f;margin-top:4px}
+  .save-bar{display:flex;height:7px;margin:9px 0;background:#dcd4c6;overflow:hidden}
+  .save-bar span{transform:scaleX(0);transform-origin:left;transition:transform .55s cubic-bezier(.2,.8,.2,1)}
+  .save-bar span:nth-child(1){transition-delay:.05s}
+  .save-bar span:nth-child(2){transition-delay:.12s}
+  .save-bar span:nth-child(3){transition-delay:.19s}
+  .save-bar span:nth-child(4){transition-delay:.26s}
+  .save-bar span:nth-child(5){transition-delay:.33s}
+  .reel.out .save-bar span{transform:scaleX(1)}
+  .slip-outs{display:flex;flex-direction:column}
+  .slip-row{display:flex;align-items:center;gap:7px;font-size:10.5px;padding:4.5px 0;border-top:1px solid #ded7c9}
+  .slip-row:first-child{border-top:0}
+  .out-dot{width:5px;height:5px;border-radius:50%;background:#8a8378;flex:none}
+  .slip-row[data-type="master"] .out-dot{background:#c8421a}
+  .slip-row[data-type="delivery"] .out-dot{background:#2f2f31}
+  .slip-row[data-type="uhd"] .out-dot{background:#b8862f}
+  .slip-row[data-type="audio"] .out-dot{background:#4a7a2f}
+  .out-name{color:#1c1c1d;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .out-size{margin-left:auto;color:#6f695f;font-size:9px}
+  .out-ext{color:#948d81;font-size:8px;width:44px;text-align:right;letter-spacing:.04em}
+  .slip-discard{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:7px;padding:5px 7px;background:#e6dfd2;border:1px dashed #bdb4a4;color:#6f695f;font-size:9.5px}
+  .slip-discard .mono{color:#a34a35;font-size:8px;letter-spacing:.06em}
+  .slip-done{margin-top:8px;text-align:center;font-size:8px;letter-spacing:.2em;color:#4a7a2f;opacity:0;transition:opacity .4s}
+  .reel.done .slip-done{opacity:1}
+  .reel.flash{animation:reelFlash .9s ease-out}
+  @keyframes reelFlash{
+    0%{border-color:var(--line);box-shadow:none}
+    35%{border-color:rgba(255,90,43,.85);box-shadow:0 0 0 1px rgba(255,90,43,.7),0 0 30px rgba(255,90,43,.22)}
+    100%{border-color:var(--line);box-shadow:none}
+  }
+  .save-num{display:inline-block;transform-origin:left center}
+  .slip::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg,transparent 32%,rgba(255,255,255,.5) 46%,transparent 60%);transform:translateX(-130%);opacity:0}
+  .reel.done .slip::after{animation:slipShine .95s ease-out}
+  @keyframes slipShine{0%{transform:translateX(-130%);opacity:0}18%{opacity:1}100%{transform:translateX(130%);opacity:0}}
+  .reel.done .save-num{animation:savePop .55s cubic-bezier(.2,.8,.2,1)}
+  @keyframes savePop{0%{transform:scale(.92)}55%{transform:scale(1.04)}100%{transform:scale(1)}}
+  .reel.done .slip-discard{border-color:#a34a35;background:#e3dac9}
+  .reel-cap{margin-top:14px;padding-top:12px;border-top:1px solid var(--line-soft);color:var(--bone-faint);font-size:11.5px;min-height:36px;position:relative;z-index:1}
+  @media(max-width:920px){
+    .hero{grid-template-columns:1fr;gap:44px}
+    header{padding-top:120px}
+  }
+
+  /* ---------- marquee ---------- */
+  .marquee{border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);overflow:hidden;background:var(--ink-2)}
+  .marquee-inner{display:flex;gap:48px;white-space:nowrap;padding:14px 0;animation:slide 38s linear infinite;width:max-content}
+  .marquee-inner span{font-family:var(--mono);font-size:12px;letter-spacing:.18em;color:var(--bone-dim)}
+  .marquee-inner i{color:var(--vermilion);font-style:normal}
+  @keyframes slide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+  /* performance band */
+  .perf-band{padding:96px 0;background:linear-gradient(180deg,#0e0e10,#0a0a0b);border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);position:relative;overflow:hidden}
+  .perf-band::before{
+    content:"";position:absolute;inset:0;pointer-events:none;opacity:.32;
+    background-image:linear-gradient(var(--line-soft) 1px,transparent 1px),linear-gradient(90deg,var(--line-soft) 1px,transparent 1px);
+    background-size:64px 64px;
+    -webkit-mask-image:radial-gradient(ellipse at 55% 15%,#000,transparent 72%);
+    mask-image:radial-gradient(ellipse at 55% 15%,#000,transparent 72%);
+  }
+  .perf-head{position:relative;z-index:1;max-width:760px}
+  .perf-head h2{font-family:var(--serif);font-size:clamp(32px,4.8vw,60px);line-height:1.1;margin:0 0 20px;font-weight:600;letter-spacing:-.02em}
+  .perf-head p{margin:0;color:var(--bone-dim);font-size:15px;max-width:620px}
+  .perf-compare{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);margin-top:44px;position:relative;z-index:1}
+  .pc{background:var(--ink);padding:28px 26px}
+  .pc h4{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--bone-faint);margin:0 0 14px;font-weight:400}
+  .pc.bad h4{color:#9a6a5c}
+  .pc.good h4{color:var(--mint)}
+  .pc ul{margin:0;padding:0;list-style:none}
+  .pc li{font-size:13.5px;color:var(--bone-dim);padding:7px 0;display:flex;gap:9px}
+  .pc li::before{content:"—";color:var(--bone-faint);flex:none}
+  .pc.good li::before{color:var(--mint)}
+  @media(max-width:860px){.perf-compare{grid-template-columns:1fr}}
+
+  .precision-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .precision-card{background:var(--ink);border:1px solid var(--line);padding:26px 24px 22px;position:relative;overflow:hidden;display:grid;grid-row:span 3;grid-template-rows:subgrid;row-gap:0;align-content:start}
+  .precision-card::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(100% 60% at 70% 0%,rgba(255,90,43,.06),transparent 62%)}
+  .pc-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:24px;color:var(--bone-faint);position:relative;z-index:1}
+  .pc-head .mono{font-size:9px;letter-spacing:.14em}
+  .pc-tag{color:var(--vermilion)}
+  .pc-desc{margin:-12px 0 16px;color:var(--bone-dim);font-size:12px;line-height:1.6}
+  .focus-stage{display:flex;flex-direction:column;gap:16px;position:relative;z-index:1}
+  .mini-player{border:1px solid #2c2c31;background:#0f0f11}
+  .mp-screen{position:relative;height:118px;overflow:hidden;background:linear-gradient(180deg,#151518 0%,#1f1d1e 60%,#2a2523 100%)}
+  .mp-sun{position:absolute;left:0;right:0;top:12px;height:40px;background:radial-gradient(circle at 20px 20px,rgba(255,90,43,.5) 0 7px,rgba(255,90,43,.12) 7.5px 12.5px,transparent 13px) var(--sun,130px) 0/700px 40px repeat-x}
+  .mp-land{position:absolute;left:0;right:0;bottom:0;height:64px;background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='16' fill='%2334323a'%3E%3Crect x='14' y='4' width='2' height='12'/%3E%3Crect x='61' y='7' width='2' height='9'/%3E%3Crect x='83' y='2' width='2' height='14'/%3E%3Crect x='150' y='6' width='2' height='10'/%3E%3Crect x='206' y='3' width='2' height='13'/%3E%3Crect x='229' y='8' width='2' height='8'/%3E%3Crect x='301' y='4' width='2' height='12'/%3E%3Crect x='357' y='1' width='2' height='15'/%3E%3Crect x='404' y='7' width='2' height='9'/%3E%3Crect x='431' y='5' width='2' height='11'/%3E%3Crect x='492' y='3' width='2' height='13'/%3E%3C/svg%3E") var(--post,0px) 100%/520px 16px repeat-x,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='560' height='34'%3E%3Cpath d='M0 24C25 24 50 12 85 11S135 22 160 23S205 15 230 17S275 5 315 4S375 25 405 26S455 18 485 19S535 24 560 24V34H0Z' fill='%23111013'/%3E%3C/svg%3E") var(--near,0px) calc(100% - 6px)/560px 34px repeat-x,
+    linear-gradient(#0d0c0e,#0d0c0e) 0 100%/100% 10px no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='760' height='46'%3E%3Cpath d='M0 30C30 30 70 12 110 14S170 30 210 28S270 8 320 6S400 26 440 30S500 20 540 18S620 34 660 30S730 30 760 30V46H0Z' fill='%231a191d'/%3E%3C/svg%3E") var(--far,0px) calc(100% - 8px)/760px 46px repeat-x}
+  .mp-label{position:absolute;left:10px;top:8px;font-size:8px;letter-spacing:.14em;color:rgba(241,236,226,.35)}
+  .mini-player .mp-track{margin-top:0;height:8px;border-width:1px 0}
+  .mp-bar{display:flex;align-items:center;gap:12px;padding:10px 12px}
+  .mp-bar .tf-big{justify-content:flex-start;font-size:clamp(26px,3vw,38px);padding:2px 0}
+  .mp-time{font-family:var(--mono);font-size:clamp(18px,2vw,24px);line-height:1.4;color:var(--bone);font-variant-numeric:tabular-nums}
+  .mp-ctrl{margin-left:auto;color:var(--bone-faint);font-size:10px;letter-spacing:.3em;white-space:nowrap}
+  .mp-total{color:var(--bone-faint);font-size:9px;letter-spacing:.08em;white-space:nowrap}
+  .kb-strip{display:flex;flex-wrap:wrap;align-items:center;gap:10px 26px;margin-top:20px;padding:16px 22px;border:1px solid var(--line);font-size:13px;color:var(--bone-dim)}
+  .kb-title{font-family:var(--serif);font-size:15px;font-weight:600;color:var(--bone)}
+  .kb-item{display:inline-flex;align-items:center;gap:6px}
+  .kb-strip kbd{font-family:var(--mono);font-size:11px;min-width:24px;height:24px;padding:0 6px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-bottom-width:2px;border-radius:3px;color:var(--bone);background:var(--ink-2)}
+  .kb-note{margin-left:auto;font-size:9px;letter-spacing:.1em;color:var(--bone-faint)}
+  .tf-big{position:relative;display:flex;align-items:baseline;justify-content:center;gap:2px;font-family:var(--mono);font-size:clamp(34px,4.6vw,56px);line-height:1;color:var(--bone);font-variant-numeric:tabular-nums;padding:6px 0}
+  .tf-big span.scrolling::before,.tf-big span.scrolling::after{content:"";position:absolute;inset:-6px;border:2px solid rgba(255,90,43,.55);border-radius:6px;pointer-events:none;animation:numRipple .45s ease-out infinite}
+  .tf-big span.scrolling::after{animation-delay:.225s;opacity:.4}
+  @keyframes numRipple{0%{opacity:.85;transform:scale(1)}100%{opacity:0;transform:scale(1.25)}}
+  .precision-card.mouse-mode .key-row{opacity:0;visibility:hidden}
+  .precision-card.keyboard-mode .mouse-lane .wheel-graphic{opacity:0;visibility:hidden}
+  .control-zone{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;height:80px;margin-top:-8px}
+  .mode-slot{position:relative;width:100%;height:58px;display:flex;align-items:center;justify-content:center}
+  .mouse-lane{position:absolute;left:0;top:0;width:100%;height:58px;pointer-events:none}
+  .mouse-lane .wheel-graphic{position:absolute;top:50%;left:0;margin-top:-27px;transition:left .35s ease,box-shadow .2s,transform .2s,opacity .2s,visibility .2s}
+  .tf-big span{position:relative;padding:2px 5px;border:1px solid transparent;transition:color .15s,border-color .15s,background .15s,transform .15s}
+  .tf-big span.hot{color:var(--vermilion);border-color:var(--vermilion);background:rgba(255,90,43,.08)}
+  .tf-big span.pop{animation:numPop .35s ease-out}
+  @keyframes numPop{0%{transform:translateY(3px);color:var(--vermilion)}100%{transform:none}}
+  .tf-big b{color:var(--bone-faint);font-weight:400}
+  .key-row{position:absolute;left:50%;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;gap:6px;transition:left .35s ease,opacity .2s,visibility .2s}
+  .key-row kbd{font-size:12px;padding:5px 9px;color:var(--bone-dim);border:1px solid var(--line);transition:background .15s,color .15s,transform .15s}
+  .key-row kbd.press{background:var(--vermilion);border-color:var(--vermilion);color:#140b08;transform:translateY(-2px)}
+  .demo-readout{text-align:center;color:var(--bone-faint);font-family:var(--mono);font-size:9px;letter-spacing:.08em;min-height:14px}
+  .demo-progress{position:relative;width:100%;height:10px;background:repeating-linear-gradient(90deg,#1f1f24 0 24px,#25252b 24px 25px);border:1px solid #34343a;overflow:hidden;margin-top:4px;z-index:auto}
+  .progress-fill{position:absolute;top:0;bottom:0;left:0;width:0;background:linear-gradient(90deg,#ff5a2b,#ff8a5c);transition:width .3s ease}
+  .progress-head{position:absolute;top:-4px;bottom:-4px;left:0;width:3px;background:var(--vermilion);box-shadow:0 0 10px rgba(255,90,43,.8);transition:left .3s ease}
+  .progress-head.pulse{animation:headPulse .35s ease-out}
+  @keyframes headPulse{0%{transform:scaleY(1.8);background:var(--vermilion)}100%{transform:scaleY(1)}}
+  .step-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;position:relative}
+  .step-pill{font-family:var(--mono);font-size:9px;padding:5px 8px;border:1px solid var(--line);color:var(--bone-dim);cursor:pointer;transition:background .2s,color .2s,border-color .2s,transform .2s}
+  .step-pill:hover{border-color:var(--bone-dim)}
+  .step-pill i{font-style:normal;display:inline-flex;align-items:center;justify-content:center;width:11px;height:11px;border:1px solid currentColor;border-radius:2px;margin-right:4px;font-size:7px;opacity:.6}
+  .step-pill.on{background:var(--vermilion);border-color:var(--vermilion);color:#140b08;transform:translateY(-1px)}
+  .step-pill.on i{opacity:1}
+  .step-pill.keypress{box-shadow:0 0 0 3px rgba(255,90,43,.18)}
+  .wheel-group{position:absolute;left:var(--cx,30%);top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;transition:left .6s ease,top .6s ease;z-index:1}
+  .key-slot{position:absolute;right:calc(100% + 22px);top:50%;width:54px;height:54px;margin-top:-27px;pointer-events:none}
+  .keycap{position:absolute;inset:0 0 5px;border-radius:10px;border:1px solid rgba(255,90,43,.35);background:linear-gradient(180deg,#2b2b31,#151518);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 5px 0 #1c1c20,0 12px 20px rgba(0,0,0,.55);opacity:0;transform:translateY(-6px);transition:opacity .2s,transform .14s ease-out,box-shadow .14s ease-out}
+  .keycap-top{position:absolute;left:5px;right:5px;top:3px;bottom:7px;border-radius:7px;background:linear-gradient(180deg,#36363d,#1f1f23);box-shadow:inset 0 1px 0 rgba(255,255,255,.1),inset 0 -2px 4px rgba(0,0,0,.35),0 1px 0 rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center}
+  .keycap-legend{font-family:var(--mono);font-size:19px;font-weight:500;line-height:1;color:var(--vermilion);text-shadow:0 0 10px rgba(255,90,43,.5);transition:text-shadow .14s}
+  .keycap.show{opacity:1;transform:none}
+  .keycap.pressed{transform:translateY(4px);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 1px 0 #1c1c20,0 4px 10px rgba(0,0,0,.5),0 0 16px rgba(255,90,43,.16)}
+  .keycap.pressed .keycap-legend{text-shadow:0 0 14px rgba(255,90,43,.9)}
+  .wheel-graphic{width:34px;height:54px;border:1px solid #3a3a40;border-radius:17px;position:relative;flex:none;overflow:hidden;background:#0f0f11;transition:box-shadow .2s,transform .2s,opacity .2s,visibility .2s}
+  .wheel-graphic.scroll{box-shadow:0 0 0 8px rgba(255,90,43,.08),0 0 26px rgba(255,90,43,.22);transform:scale(1.05)}
+  .wheel-graphic::before{content:"";position:absolute;left:50%;top:7px;width:12px;height:22px;border:1px solid #3a3a40;border-radius:6px;transform:translateX(-50%);background:repeating-linear-gradient(0deg,transparent 0 3px,#3a3a40 3px 4px)}
+  .wheel-graphic::after{content:"";position:absolute;left:50%;top:3px;width:2px;height:5px;background:var(--vermilion);transform:translateX(-50%)}
+  .wheel-graphic.scroll::before{animation:wheelScroll .5s linear infinite}
+  @keyframes wheelScroll{0%{background-position:0 0}100%{background-position:0 14px}}
+  .wheel-delta{position:absolute;left:calc(100% + 10px);top:50%;margin-top:-8px;white-space:nowrap;font-family:var(--mono);font-size:9px;color:var(--vermilion);opacity:0;transform:translateY(4px);transition:opacity .2s,transform .2s}
+  .wheel-delta.on{opacity:1;transform:none}
+  @media(max-width:1100px) and (min-width:901px){.mp-ctrl{display:none}.mp-total{margin-left:auto}}
+  @media(max-width:900px){.precision-grid{grid-template-columns:1fr;gap:20px}}
+  @media(max-width:700px){.kb-note{margin-left:0}}
+  @media(max-width:480px){.key-slot{right:calc(100% + 12px)}.mp-bar .tf-big ~ .mp-total{display:none}}
+  @media(max-width:560px){.mp-bar .tf-big{font-size:clamp(22px,7vw,30px)}.mp-ctrl{display:none}.mp-total{margin-left:auto}}
+  /* export: free settings + system preset carousel */
+  .export-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:20px}
+  .export-panel,.template-panel{background:var(--ink);border:1px solid var(--line);padding:26px 24px}
+  .xp-head{display:flex;justify-content:space-between;color:var(--bone-faint);margin-bottom:16px}
+  .xp-head .mono{font-size:9px;letter-spacing:.14em}
+  .xp-hint{font-size:10px;color:var(--bone-faint);line-height:1.5;margin-bottom:14px}
+  .xp-rows{border-top:1px solid var(--line-soft)}
+  .xp-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line-soft);font-size:12px;color:var(--bone-dim)}
+  .xp-row b{color:var(--bone);font-weight:500;text-align:right}
+  .xp-row b.hot{color:var(--vermilion)}
+  .xp-row b[data-edit]{cursor:pointer;border-bottom:1px dashed transparent;transition:border-color .2s,color .2s}
+  .xp-row b[data-edit]:hover{border-bottom-color:var(--bone-faint);color:var(--vermilion)}
+  .xp-row b[data-edit]::after{content:" ✎";font-size:8px;color:var(--bone-faint);opacity:0;transition:opacity .2s}
+  .xp-row b[data-edit]:hover::after{opacity:1}
+  .mode-wrap{display:flex;gap:4px}
+  .mode{font-style:normal;font-family:var(--mono);font-size:8px;padding:3px 6px;border:1px solid var(--line);color:var(--bone-faint);cursor:pointer}
+  .mode.on{background:var(--vermilion);border-color:var(--vermilion);color:#140b08}
+  .xp-row b.ok{color:var(--mint)}
+  .xp-row b.custom{font-family:var(--mono);font-size:9px;color:var(--bone-dim)}
+  .xp-row b.custom em{font-style:normal;color:var(--vermilion);margin-left:6px}
+  .xp-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+  .xp-btn{font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;padding:6px 10px;background:var(--vermilion);border:1px solid var(--vermilion);color:#140b08;transition:box-shadow .2s,background .2s}
+  .xp-btn.ghost{background:transparent;border-color:var(--line);color:var(--bone-dim)}
+  .xp-btn.dirty{box-shadow:0 0 0 4px rgba(255,90,43,.15);background:#ff7147}
+  .preset-carousel{border:1px solid var(--line-soft);background:#121214;padding:12px;margin-bottom:18px}
+  .preset-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+  .preset-card{border:1px solid var(--line);background:#151517;padding:10px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:3px;transition:border-color .25s,background .25s,transform .25s;appearance:none;-webkit-appearance:none;font:inherit;color:inherit}
+  .preset-card b{font-size:11px;color:var(--bone);font-weight:500;font-family:var(--sans)}
+  .preset-card span{font-family:var(--mono);font-size:7.5px;color:var(--bone-faint);letter-spacing:.03em}
+  .preset-card.on{border-color:var(--vermilion);background:rgba(255,90,43,.06);transform:translateY(-1px)}
+  .preset-card.on b{color:var(--vermilion)}
+  .tpl-head{margin-top:16px}
+  .tpl-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .tpl-card{border:1px solid var(--line);background:#141416;padding:12px;position:relative;transition:border-color .3s,transform .3s,opacity .3s}
+  .tpl-card b{display:block;font-size:12px;color:var(--bone);font-weight:500;margin-bottom:4px}
+  .tpl-card span{font-family:var(--mono);font-size:8px;color:var(--bone-faint);letter-spacing:.04em}
+  .tpl-card.applied{border-color:rgba(255,90,43,.55)}
+  .tpl-card.applied::after{content:"已套用";position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:7px;color:var(--vermilion);border:1px solid rgba(255,90,43,.4);padding:2px 4px}
+  .tpl-card.new{opacity:0;transform:translateY(6px)}
+  .tpl-card.new.on{opacity:1;transform:none;border-color:var(--mint)}
+  .tpl-note{margin-top:18px;border-left:2px solid var(--vermilion);padding-left:12px;color:var(--bone-dim);font-size:12px}
+  @media(max-width:860px){.export-grid{grid-template-columns:1fr}}
+  /* ---------- sections ---------- */
+  section{padding:110px 0;border-bottom:1px solid var(--line-soft)}
+  .sec-head{display:grid;grid-template-columns:148px 1fr;gap:24px;margin-bottom:64px;align-items:start}
+  .sec-no{font-family:var(--mono);font-size:12px;color:var(--vermilion);letter-spacing:.16em;padding-top:12px;white-space:nowrap}
+  h2{font-family:var(--serif);font-size:clamp(30px,4.2vw,52px);line-height:1.16;margin:0 0 18px;font-weight:600;letter-spacing:-.01em}
+  .sec-head p{margin:0;color:var(--bone-dim);max-width:600px;font-size:15px}
+  @media(max-width:760px){.sec-head{grid-template-columns:1fr;gap:10px}}
+
+  /* problem */
+  .problem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line-soft);border:1px solid var(--line-soft)}
+  .problem-item{background:var(--ink);padding:30px 26px 28px;min-height:206px;position:relative;transition:background .25s}
+  .problem-item:hover{background:#121214}
+  .problem-item .mono{font-size:10px;color:var(--bone-faint);letter-spacing:.16em;display:block;margin-bottom:34px}
+  .problem-item h3{font-family:var(--serif);font-size:21px;line-height:1.35;margin:0 0 10px;font-weight:600}
+  .problem-item p{margin:0;color:var(--bone-dim);font-size:14px;line-height:1.75}
+  .problem-close{margin:34px 0 0;padding-left:16px;border-left:2px solid var(--vermilion);font-size:15px;line-height:1.8;color:var(--bone);max-width:780px}
+  .problem-close b{color:var(--vermilion);font-weight:600}
+  @media(max-width:860px){.problem-grid{grid-template-columns:1fr}}
+
+  /* features */
+  .features{display:grid;grid-template-columns:repeat(12,1fr);gap:1px;background:var(--line-soft);border:1px solid var(--line-soft)}
+  .card{background:var(--ink);padding:34px 30px 32px;grid-column:span 4;position:relative;transition:background .25s;min-height:220px}
+  .card:nth-child(1),.card:nth-child(4),.card:nth-child(5){grid-column:span 8}
+  .card:hover{background:#121214}
+  .card .num{font-family:var(--mono);font-size:11px;color:var(--bone-faint);letter-spacing:.16em;display:block;margin-bottom:40px}
+  .card h3{font-family:var(--serif);font-size:23px;margin:0 0 12px;font-weight:600}
+  .card p{margin:0;color:var(--bone-dim);font-size:14px;max-width:46ch}
+  .card .tags{margin-top:18px;display:flex;gap:8px;flex-wrap:wrap}
+  .tag{font-family:var(--mono);font-size:10px;letter-spacing:.12em;border:1px solid var(--line);padding:4px 8px;color:var(--bone-faint)}
+  .card::after{content:"";position:absolute;left:0;top:0;height:2px;width:0;background:var(--vermilion);transition:width .35s}
+  .card:hover::after{width:100%}
+  @media(max-width:980px){.card,.card:nth-child(1),.card:nth-child(4),.card:nth-child(5){grid-column:span 6}}
+  @media(max-width:680px){.card,.card:nth-child(1),.card:nth-child(4),.card:nth-child(5){grid-column:span 12;min-height:0}}
+
+  /* features lead */
+  .cap-lead{
+    margin:0 0 44px;max-width:860px;
+    font-family:var(--serif);font-weight:600;
+    font-size:clamp(21px,2.7vw,28px);line-height:1.5;letter-spacing:-.01em;
+    color:var(--bone);
+  }
+  .cap-lead span{
+    font-family:var(--sans);font-weight:400;letter-spacing:0;
+    font-size:max(12px,.56em);color:var(--bone-dim);
+  }
+
+  /* workflow */
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--line)}
+  .step{padding:34px 26px 30px 0;position:relative}
+  .step + .step{padding-left:26px;border-left:1px solid var(--line-soft)}
+  .step .big{font-family:var(--mono);font-size:13px;color:var(--vermilion);letter-spacing:.18em}
+  .step h3{font-family:var(--serif);font-size:24px;margin:26px 0 10px;font-weight:600}
+  .step p{margin:0;color:var(--bone-dim);font-size:14px}
+  .step .bar{position:absolute;top:-1px;left:0;height:2px;width:0;background:var(--vermilion);transition:width .6s}
+  .step.in .bar{width:100%}
+  @media(max-width:860px){.steps{grid-template-columns:1fr 1fr}.step:nth-child(3){border-left:0;padding-left:0}}
+  @media(max-width:560px){.steps{grid-template-columns:1fr}.step+.step{border-left:0;padding-left:0;border-top:1px solid var(--line-soft)}}
+
+  /* workflow: one-pass demo (Cmd+F / Cmd+D) */
+  .onepass{margin-top:64px;border:1px solid var(--line);background:linear-gradient(180deg,#111113,#0d0d0e);padding:26px 24px 18px;position:relative;overflow:hidden}
+  .onepass::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(90% 70% at 12% 0%,rgba(255,90,43,.07),transparent 60%)}
+  .onepass > *{position:relative;z-index:1}
+  .op-intro{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:end;margin-bottom:26px}
+  .op-kicker{display:block;color:var(--vermilion);font-size:10px;margin-bottom:14px}
+  .op-intro h3{font-family:var(--serif);font-size:clamp(24px,2.8vw,32px);line-height:1.25;margin:0;font-weight:600}
+  .op-intro p{margin:0;color:var(--bone-dim);font-size:13.5px;line-height:1.75}
+  .op-head{display:flex;justify-content:space-between;align-items:center;gap:12px;color:var(--bone-faint);padding-top:16px;border-top:1px solid var(--line-soft);margin-bottom:6px}
+  .op-head .mono{font-size:10px}
+  .op-default{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.04em;color:var(--bone-dim);border:1px solid var(--line);padding:3px 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .op-default b{color:var(--mint);font-weight:400}
+  .op-body{display:grid;grid-template-columns:1.25fr .75fr;gap:26px;align-items:start}
+  .op-toast-slot{position:relative;height:36px}
+  .op-toast{position:absolute;left:50%;bottom:6px;max-width:100%;transform:translate(-50%,6px);opacity:0;padding:5px 11px;background:#232327;border:1px solid #34343a;border-radius:6px;box-shadow:0 8px 20px rgba(0,0,0,.4);color:var(--bone);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:opacity .2s,transform .25s cubic-bezier(.2,.8,.2,1)}
+  .op-toast.show{opacity:1;transform:translate(-50%,0)}
+  .op-toast .mono{font-size:9.5px;letter-spacing:.02em;color:var(--bone-dim);text-transform:none}
+  .op-track{height:44px}
+  .op-region{position:absolute;top:0;bottom:0;z-index:1;opacity:0;transition:opacity .35s,background .3s}
+  .op-region.viewing{opacity:1;background:rgba(241,236,226,.05)}
+  .op-region,.op-row{--rgb:255 90 43}
+  .op-region[data-type="delivery"],.op-row[data-type="delivery"]{--rgb:241 236 226}
+  .op-region[data-type="uhd"],.op-row[data-type="uhd"]{--rgb:216 179 106}
+  .op-region[data-type="audio"],.op-row[data-type="audio"]{--rgb:184 233 134}
+  .op-region.keep{opacity:1;background:linear-gradient(180deg,rgb(var(--rgb) / .26),rgb(var(--rgb) / .1));box-shadow:inset 0 2px 0 rgb(var(--rgb))}
+  .op-region.drop{opacity:1;background:repeating-linear-gradient(135deg,rgba(111,107,100,.32) 0 4px,rgba(12,12,13,.55) 4px 8px);box-shadow:inset 0 2px 0 #a34a35}
+  .op-keys{display:flex;gap:8px;margin-top:22px}
+  .op-key{flex:1;display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);background:#121214;min-width:0;transition:border-color .2s,background .2s}
+  .op-key kbd{font-family:var(--mono);font-size:11px;min-width:24px;height:24px;padding:0 6px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-bottom-width:2px;border-radius:3px;color:var(--bone);background:var(--ink-2);transition:background .15s,color .15s,border-color .15s,transform .15s}
+  .op-key kbd + kbd{margin-left:-4px}
+  .op-key span{font-size:11px;color:var(--bone-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .op-key.press kbd{background:var(--vermilion);border-color:var(--vermilion);color:#140b08;transform:translateY(1px)}
+  .op-key.press{border-color:rgba(255,90,43,.6);background:rgba(255,90,43,.06)}
+  .op-key[data-k="f"].press kbd{background:var(--mint);border-color:var(--mint)}
+  .op-key[data-k="f"].press{border-color:rgba(184,233,134,.6);background:rgba(184,233,134,.06)}
+  .op-key[data-k="d"].press kbd{background:#a34a35;border-color:#a34a35;color:var(--bone)}
+  .op-key[data-k="d"].press{border-color:rgba(163,74,53,.7);background:rgba(163,74,53,.08)}
+  .op-log{display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin-top:14px;min-height:22px}
+  .op-log-label{font-size:9px;color:var(--bone-faint);margin-right:4px}
+  .op-chip{font-family:var(--mono);font-size:9px;padding:2px 6px;border:1px solid var(--line);color:var(--bone-dim);animation:chipIn .3s cubic-bezier(.2,.8,.2,1)}
+  .op-chip.x{color:var(--vermilion);border-color:rgba(255,90,43,.45)}
+  .op-chip.f{color:var(--mint);border-color:rgba(184,233,134,.45)}
+  .op-chip.d{color:#c06a55;border-color:rgba(163,74,53,.6)}
+  .op-chip.e{color:#140b08;background:var(--vermilion);border-color:var(--vermilion)}
+  @keyframes chipIn{0%{opacity:0;transform:translateY(4px) scale(.9)}100%{opacity:1;transform:none}}
+  .op-note{margin-top:12px;font-size:11px;color:var(--bone-faint)}
+  .op-note kbd{font-family:var(--mono);font-size:9.5px;padding:1px 4px;border:1px solid var(--line);border-radius:3px;color:var(--bone-dim)}
+  .op-list{display:flex;flex-direction:column;gap:6px;padding-top:36px}
+  .op-row{position:relative;display:flex;align-items:center;gap:9px;height:44px;padding:0 10px 0 13px;background:#141416;border:1px solid #26262a;overflow:hidden;transition:opacity .4s ease,transform .45s cubic-bezier(.2,.8,.2,1),border-color .3s}
+  .js .op-row{opacity:0;transform:translateY(-8px)}
+  .js .op-row.on{opacity:1;transform:none}
+  .op-row::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--bone-faint);transition:background .3s}
+  .op-row.viewing{border-color:rgba(241,236,226,.32)}
+  .op-row.keep::before{background:rgb(var(--rgb))}
+  .op-row.drop::before{background:#6f6b64}
+  .op-meta{display:flex;flex-direction:column;min-width:0;line-height:1.35}
+  .op-name{font-size:12px;color:var(--bone);white-space:nowrap}
+  .op-range{font-family:var(--mono);font-size:8.5px;color:var(--bone-faint);letter-spacing:.04em}
+  .op-row.drop .op-name{color:var(--bone-faint);text-decoration:line-through}
+  .op-name{position:relative;padding:0 3px;margin-left:-3px;border:1px solid transparent;transition:border-color .15s,background .15s}
+  .op-name.default{color:var(--bone-faint)}
+  .op-name.editing{border-color:var(--vermilion);background:rgba(255,90,43,.08)}
+  .op-name.editing::after{content:"";display:inline-block;width:1px;height:10px;background:var(--vermilion);margin-left:2px;vertical-align:-1px;animation:caretBlink .7s steps(1) infinite}
+  .op-name.dbl{animation:nameDbl .32s ease-out}
+  @keyframes nameDbl{0%,100%{background:transparent}30%,70%{background:rgba(241,236,226,.14)}}
+  .op-badge{margin-left:auto;flex:none;font-family:var(--mono);font-size:8.5px;letter-spacing:.04em;padding:3px 6px;border:1px dashed var(--bone-faint);color:var(--bone-dim);white-space:nowrap;transition:color .3s,border-color .3s}
+  .op-row.keep .op-badge{border-style:solid;border-color:rgb(var(--rgb));color:rgb(var(--rgb))}
+  .op-badge.click{box-shadow:0 0 0 3px rgba(241,236,226,.16)}
+  .op-side{position:relative}
+  .op-menu{position:absolute;right:10px;z-index:5;min-width:128px;padding:4px;background:#1d1d20;border:1px solid #34343a;border-radius:6px;box-shadow:0 12px 28px rgba(0,0,0,.5);opacity:0;transform:translateY(-4px);pointer-events:none;transition:opacity .15s,transform .18s}
+  .op-menu.show{opacity:1;transform:none}
+  .op-menu span{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:4px;font-family:var(--mono);font-size:9px;letter-spacing:.04em;color:var(--bone-dim);transition:background .12s,color .12s}
+  .op-menu span::before{content:"";width:5px;height:5px;border-radius:50%;background:rgb(var(--rgb))}
+  .op-menu span[data-type="master"]{--rgb:255 90 43}
+  .op-menu span[data-type="delivery"]{--rgb:241 236 226}
+  .op-menu span[data-type="uhd"]{--rgb:216 179 106}
+  .op-menu span[data-type="audio"]{--rgb:184 233 134}
+  .op-menu span.hl{background:rgba(241,236,226,.1);color:var(--bone)}
+  .op-row.drop .op-badge{border-style:solid;border-color:#a34a35;color:#c06a55}
+  .op-badge.pop{animation:badgePop .45s cubic-bezier(.2,.8,.2,1)}
+  @keyframes badgePop{0%{transform:rotateX(90deg);opacity:.2}100%{transform:none;opacity:1}}
+  .op-prog{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,rgb(var(--rgb) / .04),rgb(var(--rgb) / .14));pointer-events:none}
+  .op-row.skip{opacity:.45}
+  .op-row.exported .op-badge{background:rgb(var(--rgb));color:#140b08}
+  .op-export{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line-soft)}
+  .op-status{font-size:9px;color:var(--bone-faint);letter-spacing:.06em}
+  .op-btn{font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;padding:6px 10px;border:1px solid var(--line);color:var(--bone-faint);transition:background .2s,color .2s,border-color .2s,box-shadow .2s}
+  .onepass.ready .op-btn{background:var(--vermilion);border-color:var(--vermilion);color:#140b08}
+  .op-btn.press{box-shadow:0 0 0 4px rgba(255,90,43,.2);background:#ff7147}
+  .op-foot{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-top:18px;padding-top:12px;border-top:1px solid var(--line-soft)}
+  .op-cap{color:var(--bone-faint);font-size:11.5px;min-height:20px}
+  .op-stats{display:flex;gap:14px;flex:none;font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;color:var(--bone-faint)}
+  .op-stats b{color:var(--bone);font-weight:400;font-size:12px;margin:0 2px}
+  .op-stats b.hot{color:var(--vermilion)}
+  @media(max-width:860px){
+    .op-intro{grid-template-columns:1fr;gap:14px}
+    .op-body{grid-template-columns:1fr;gap:18px}
+    .op-list{padding-top:0}
+    .op-foot{flex-direction:column;align-items:flex-start;gap:8px}
+  }
+  @media(max-width:560px){
+    .onepass{padding:22px 16px 16px}
+    .op-keys{flex-wrap:wrap}
+    .op-key{flex:1 1 40%}
+    .op-default{display:none}
+  }
+
+  /* subtitle split */
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line-soft);border:1px solid var(--line-soft)}
+  .pane{background:var(--ink);padding:44px 38px}
+  .pane.local{background:linear-gradient(160deg,#14150f,#0e0f0b)}
+  .pane .kicker{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--bone-faint);margin-bottom:22px}
+  .pane.local .kicker{color:var(--mint)}
+  .pane h3{font-family:var(--serif);font-size:28px;margin:0 0 14px;font-weight:600}
+  .pane p{color:var(--bone-dim);font-size:14px;margin:0 0 22px}
+  .pane ul{margin:0;padding:0;list-style:none}
+  .pane li{padding:11px 0;border-top:1px solid var(--line-soft);font-size:13.5px;color:var(--bone-dim);display:flex;gap:10px}
+  .pane li::before{content:"—";color:var(--vermilion)}
+  .pane.local li::before{color:var(--mint)}
+  @media(max-width:760px){.split{grid-template-columns:1fr}}
+
+  /* install */
+  .install{display:grid;grid-template-columns:1fr 1fr;gap:56px}
+  .req{border:1px solid var(--line);padding:30px 28px;background:var(--ink-2)}
+  .req dl{margin:0;display:grid;grid-template-columns:110px 1fr;gap:0}
+  .req dt{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--bone-faint);padding:14px 0;border-top:1px solid var(--line-soft)}
+  .req dd{margin:0;padding:14px 0;border-top:1px solid var(--line-soft);font-size:14px}
+  .req dt:first-of-type,.req dd:first-of-type{border-top:0}
+  .ol{counter-reset:s;margin:0;padding:0;list-style:none}
+  .ol li{counter-increment:s;position:relative;padding:0 0 26px 46px;color:var(--bone-dim);font-size:14px}
+  .ol li::before{content:counter(s,decimal-leading-zero);position:absolute;left:0;top:0;font-family:var(--mono);font-size:12px;color:var(--vermilion)}
+  .ol li strong{color:var(--bone);display:block;font-weight:500;margin-bottom:3px}
+  .note{margin-top:18px;border-left:2px solid var(--vermilion);padding:12px 0 12px 16px;color:var(--bone-dim);font-size:13px;background:rgba(255,90,43,.04)}
+  @media(max-width:860px){.install{grid-template-columns:1fr;gap:40px}}
+
+  /* faq */
+  details{border-top:1px solid var(--line-soft);padding:22px 0}
+  details[open]{padding-bottom:26px}
+  summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:20px;font-size:16px;font-weight:500}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";font-family:var(--mono);color:var(--vermilion);font-size:18px;line-height:1}
+  details[open] summary::after{content:"−"}
+  details p{margin:14px 0 0;color:var(--bone-dim);font-size:14px;max-width:76ch}
+  details code{font-family:var(--mono);font-size:.9em;color:var(--bone);background:var(--ink-3);border:1px solid var(--line-soft);padding:1px 5px;word-break:break-all}
+
+  /* download band */
+  .dl-band{background:var(--vermilion);color:#160a06;padding:86px 0;border-bottom:0;position:relative;overflow:hidden}
+  .dl-band::after{
+    content:"";position:absolute;inset:0;pointer-events:none;opacity:.12;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23m)'/%3E%3C/svg%3E");
+  }
+  .dl-inner{display:flex;justify-content:space-between;align-items:flex-end;gap:40px;position:relative;z-index:1;flex-wrap:wrap}
+  .dl-band h2{font-family:var(--serif);font-size:clamp(36px,5.6vw,72px);line-height:1.04;margin:0;color:#160a06;letter-spacing:-.02em}
+  .dl-band .mono{color:rgba(22,10,6,.62)}
+  .dl-band .btn{background:#160a06;color:var(--bone);border-color:#160a06}
+  .dl-band .btn:hover{background:#2a130c}
+  .dl-band .small{margin-top:16px;font-size:12px;color:rgba(22,10,6,.68);font-family:var(--mono);letter-spacing:.04em}
+
+  /* footer */
+  footer{padding:64px 0 44px;background:#09090a}
+  .foot-grid{display:grid;grid-template-columns:1.4fr .6fr .6fr .6fr;gap:40px;margin-bottom:52px}
+  .foot-brand{font-family:var(--serif);font-size:30px;line-height:1.2}
+  .foot-brand span{color:var(--vermilion)}
+  .foot-col h4{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--bone-faint);margin:0 0 14px;font-weight:400}
+  .foot-col a,.foot-col p{display:block;font-size:13px;color:var(--bone-dim);margin:0 0 9px}
+  .foot-col a:hover{color:var(--bone)}
+  .legal{border-top:1px solid var(--line-soft);padding-top:24px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;color:var(--bone-faint);font-size:12px}
+  @media(max-width:760px){.foot-grid{grid-template-columns:1fr;gap:28px}}
+
+  /* reveal */
+  .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){
+    .reveal{opacity:1;transform:none;transition:none}
+    .playhead,.marquee-inner{animation:none}
+    html{scroll-behavior:auto}
+  }
+  .toast{
+    position:fixed;left:50%;bottom:32px;transform:translateX(-50%);
+    background:var(--bone);color:var(--ink);padding:11px 18px;font-size:13px;
+    display:none;z-index:1002;
+  }
+  .toast.show{display:block}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+
+<nav id="nav">
+  <a class="brand" href="#top"><img class="mark" src="apple-touch-icon.png" alt="" width="22" height="22">VShunt · 分流</a>
+  <div class="navlinks" id="navLinks">
+    <a href="#workflow">工作流</a>
+    <a href="#export">导出</a>
+    <a href="#highlights">亮点</a>
+    <a href="#subtitle">字幕</a>
+    <a href="#faq">常见问题</a>
+    <a class="ext" href="https://github.com/timehijack/VShunt" target="_blank" rel="noopener">GitHub
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M14 4h6v6M20 4l-8 8M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
+    </a>
+  </div>
+  <a class="nav-cta" href="#download" data-download>下载 macOS 版</a>
+  <button type="button" class="nav-toggle" id="navToggle" aria-label="菜单" aria-expanded="false" aria-controls="navLinks"><span></span><span></span></button>
+</nav>
+
+<header id="top">
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <div class="eyebrow mono reveal"><span class="dot"></span>macOS 原生 · 按需分流 · 开箱即用</div>
+        <h1 class="reveal">原片不用<em>全留</em>，<br>也不用<em>全删</em>。</h1>
+        <p class="lede reveal">VShunt 把拍摄素材按价值分流：用于调色的 Log 原片无损留作母版，高码率相机素材可原分辨率压低码率，日常回看、发布分享的转为 1080p，也可仅保留原始音频。无需来回切换时间线，也不用反复折腾导出，只需一遍就能完成选片、剪辑、转码参数设定和批量导出。按需分流后，原片可放心删除，把宝贵的存储空间留给真正有用的素材。</p>
+        <div class="actions reveal">
+          <a class="btn" href="#download" data-download>下载 VShunt
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v13m0 0l-5-5m5 5l5-5M4 21h16"/></svg>
+          </a>
+          <a class="btn ghost" href="#features">看看能做什么</a>
+        </div>
+        <div class="meta reveal">
+          <span>macOS 26.0+</span><span>·</span><span>Apple Silicon</span><span>·</span><span>DMG · 约 75 MB</span>
+        </div>
+      </div>
+
+      <div class="reel reveal" id="reel">
+        <div class="reel-head">
+          <span class="mono">TIMELINE / 01</span>
+          <span class="tc" id="timecode">00:15:30.00</span>
+        </div>
+
+        <div class="reel-stage">
+          <div class="scene scene-cut">
+            <div class="source">
+              <div class="source-label mono"><span>SOURCE · A001.MOV</span><span>18.4 GB</span></div>
+              <div class="source-track">
+                <div class="x-mark" data-cut="1" style="left:12%">X</div>
+                <div class="x-mark" data-cut="2" style="left:30%">X</div>
+                <div class="x-mark" data-cut="3" style="left:48%">X</div>
+                <div class="x-mark" data-cut="4" style="left:66%">X</div>
+                <div class="x-mark" data-cut="5" style="left:84%">X</div>
+                <div class="playhead" id="reelPlayhead"></div>
+              </div>
+              <div class="ticks"><span>00:00</span><span>05:00</span><span>10:00</span><span>15:00</span><span>20:00</span></div>
+            </div>
+
+            <div class="seg-list">
+              <div class="seg-item" data-type="master">
+                <span class="seg-idx mono">01</span><span class="seg-name" data-default="片段-1" data-name="高光">片段-1</span><span class="seg-badge"><span class="face front">未标记</span><span class="face back">母版 · MOV</span></span>
+              </div>
+              <div class="seg-item" data-type="delivery">
+                <span class="seg-idx mono">02</span><span class="seg-name" data-default="片段-2" data-name="花絮">片段-2</span><span class="seg-badge"><span class="face front">未标记</span><span class="face back">1080 · MP4</span></span>
+              </div>
+              <div class="seg-item" data-type="discard">
+                <span class="seg-idx mono">03</span><span class="seg-name" data-default="片段-3" data-name="">片段-3</span><span class="seg-badge"><span class="face front">未标记</span><span class="face back">废弃 · 忽略</span></span>
+              </div>
+              <div class="seg-item" data-type="uhd">
+                <span class="seg-idx mono">04</span><span class="seg-name" data-default="片段-4" data-name="空镜">片段-4</span><span class="seg-badge"><span class="face front">未标记</span><span class="face back">4K · MOV</span></span>
+              </div>
+              <div class="seg-item" data-type="audio">
+                <span class="seg-idx mono">05</span><span class="seg-name" data-default="片段-5" data-name="仅对话">片段-5</span><span class="seg-badge"><span class="face front">未标记</span><span class="face back">仅音频 · AAC</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="scene scene-pack">
+            <div class="slip">
+              <div class="slip-head"><span class="mono">DELIVERY SLIP</span><span class="mono">A001.MOV</span></div>
+              <div class="slip-save">
+                <span class="save-num"><span id="saveNum">0.0</span><span class="unit">GB</span></span>
+                <span class="save-pct">节省 66%</span>
+              </div>
+              <div class="save-sub">原片 18.4 GB → 保留 6.2 GB</div>
+              <div class="save-bar" aria-hidden="true">
+                <span style="width:18.5%;background:#c8421a"></span>
+                <span style="width:4.9%;background:#2f2f31"></span>
+                <span style="width:66.3%;background:repeating-linear-gradient(135deg,#c9c0b0 0 3px,#e6dfd2 3px 6px)"></span>
+                <span style="width:8.7%;background:#b8862f"></span>
+                <span style="width:1.6%;background:#4a7a2f"></span>
+              </div>
+              <div class="slip-outs">
+                <div class="slip-row" data-type="master"><span class="out-dot"></span><span class="out-name">母版</span><span class="out-size mono">3.4 GB</span><span class="out-ext mono">MOV</span></div>
+                <div class="slip-row" data-type="delivery"><span class="out-dot"></span><span class="out-name">1080p 留存</span><span class="out-size mono">0.9 GB</span><span class="out-ext mono">MP4</span></div>
+              </div>
+              <div class="slip-discard"><span>废弃片段 · 未导出</span><span class="mono">12.2 GB</span></div>
+              <div class="slip-outs">
+                <div class="slip-row" data-type="uhd"><span class="out-dot"></span><span class="out-name">4K 压缩</span><span class="out-size mono">1.6 GB</span><span class="out-ext mono">MOV</span></div>
+                <div class="slip-row" data-type="audio"><span class="out-dot"></span><span class="out-name">纯音频</span><span class="out-size mono">0.3 GB</span><span class="out-ext mono">AAC</span></div>
+              </div>
+              <div class="slip-done mono">SPLIT COMPLETE</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="reel-cap" id="reelCap">按 X 切分，时间线自动切段。</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-inner">
+    <span>帧级切分</span><i>/</i><span>时间线 + 波形</span><i>/</i><span>双后端字幕</span><i>/</i><span>批量代理</span><i>/</i><span>导出模板</span><i>/</i><span>按需分流</span><i>/</i><span>多语言支持</span><i>/</i>
+    <span>帧级切分</span><i>/</i><span>时间线 + 波形</span><i>/</i><span>双后端字幕</span><i>/</i><span>批量代理</span><i>/</i><span>导出模板</span><i>/</i><span>按需分流</span><i>/</i><span>多语言支持</span><i>/</i>
+  </div>
+</div>
+
+<section id="problem">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-no">01 / PROBLEM</div>
+      <div>
+        <h2>全留太贵，全删太狠。</h2>
+        <p>素材只会越拍越多：一小时 4K 可能上百 GB。全留着，存储成本一直涨；全删了，又怕以后还要用。真正卡住的往往不是「剪得慢」，而是素材从来没有按价值分流。</p>
+      </div>
+    </div>
+
+    <div class="problem-grid">
+      <article class="problem-item reveal">
+        <span class="mono">P.01 / 两难</span>
+        <h3>留着占地方，<br>删了怕后悔</h3>
+        <p>一条拍完的片子里，真正要留的可能只有几分钟：一段留作母版，一段只发平台，一段只要声音，其余都是废片。它们本来就在同一段素材里，删除时只能整条赌运气。</p>
+      </article>
+      <article class="problem-item reveal">
+        <span class="mono">P.02 / 断点</span>
+        <h3>选、剪、分、导，<br>散落在四个地方</h3>
+        <p>传统软件也能剪辑和导出，但选片段、标入点出点、逐段设置导出参数各在一处，无法在一条时间线上一次完成，多个片段就得重复多轮。</p>
+      </article>
+      <article class="problem-item reveal">
+        <span class="mono">P.03 / 代价</span>
+        <h3>时间花在重复操作，<br>空间留给废片</h3>
+        <p>逐段导出、单独抽音频、再用表格记下哪些能删；手写 ffmpeg 还要为每一段拼参数。真正有用的素材，并没有因此变得更好找。</p>
+      </article>
+    </div>
+
+    <p class="problem-close reveal">VShunt 把这一整套压缩成一次操作：在<b>一条时间线</b>上边看边选、边切边分流，每个片段落下时就已确定去向与规格，最后一次性导出。原片即可放心删除，只为好片留空间，不为废片留位置。</p>
+  </div>
+</section>
+
+<section id="workflow">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-no">02 / WORKFLOW</div>
+      <div>
+        <h2>四步，从素材到交付。</h2>
+        <p>无需来回切换时间线，也不用反复折腾导出。只需一遍即可完成选片、剪辑、转码设定和导出规整。</p>
+      </div>
+    </div>
+    <div class="steps">
+      <div class="step reveal"><div class="bar"></div><div class="big">STEP 01</div><h3>识别</h3><p>对话类素材仅凭画面难以判断价值。先识别字幕，通过文字快速了解每段内容，按关键词搜索并直接跳转。</p></div>
+      <div class="step reveal"><div class="bar"></div><div class="big">STEP 02</div><h3>切分</h3><p>不用单独设入点和出点：X 键即可自动分段。配合字幕和波形，切口能精确落在一句话的停顿上。</p></div>
+      <div class="step reveal"><div class="bar"></div><div class="big">STEP 03</div><h3>分流</h3><p>点击片段或使用快捷键，为每段指定去向：源片复制、预设压缩、自定义规格、仅提取音频，或直接废弃忽略。</p></div>
+      <div class="step reveal"><div class="bar"></div><div class="big">STEP 04</div><h3>导出</h3><p>按照既定参数即可一次性全部导出，也支持单独导出每一段，不用每个片段挨个操作。</p></div>
+    </div>
+
+    <div class="onepass reveal" id="onepass">
+      <div class="op-intro">
+        <div>
+          <span class="mono op-kicker">HIGHLIGHT / ONE PASS</span>
+          <h3>⌘F 留，⌘D 弃，<br>看一遍就定稿。</h3>
+        </div>
+        <p>按 X 切分后根据需要使用 ⌘F 将片段标记为"保留"，或 ⌘D 将片段标记为"废弃"；需要别的规格或名称，在片段列表里顺手改掉。只往前走，不用来回处理片段，也不用逐段导出。看完一遍，点一次导出就行。</p>
+      </div>
+
+      <div class="op-head">
+        <span class="mono">TIMELINE / A002.MOV</span>
+        <span class="op-default">⌘F 默认导出 · <b>母版</b> · 源片复制 · MOV</span>
+        <span class="tc" id="opTc">00:00:00.00</span>
+      </div>
+
+      <div class="op-body">
+        <div class="op-main">
+          <div class="op-toast-slot"><div class="op-toast" id="opToast"></div></div>
+          <div class="source">
+            <div class="source-label mono"><span>SOURCE · A002.MOV</span><span>12:00</span></div>
+            <div class="source-track op-track">
+              <div class="op-region" style="left:0;width:20.8333%"></div>
+              <div class="op-region" style="left:20.8333%;width:16.6667%"></div>
+              <div class="op-region" style="left:37.5%;width:25%"></div>
+              <div class="op-region" style="left:62.5%;width:16.6667%"></div>
+              <div class="op-region" style="left:79.1667%;width:20.8333%"></div>
+              <div class="x-mark" style="left:20.8333%">X</div>
+              <div class="x-mark" style="left:37.5%">X</div>
+              <div class="x-mark" style="left:62.5%">X</div>
+              <div class="x-mark" style="left:79.1667%">X</div>
+              <div class="playhead" id="opPlayhead" style="left:0"></div>
+            </div>
+            <div class="ticks"><span>00:00</span><span>03:00</span><span>06:00</span><span>09:00</span><span>12:00</span></div>
+          </div>
+
+          <div class="op-keys">
+            <div class="op-key" data-k="x"><kbd>X</kbd><span>切分</span></div>
+            <div class="op-key" data-k="f"><kbd>⌘</kbd><kbd>F</kbd><span>保留 · 默认母版</span></div>
+            <div class="op-key" data-k="d"><kbd>⌘</kbd><kbd>D</kbd><span>废弃 · 不导出</span></div>
+          </div>
+          <div class="op-log" id="opLog"><span class="mono op-log-label">KEYS</span></div>
+          <div class="op-note">播放头停在切点上时，⌘F / ⌘D 标记的是刚看完的那一段；已经播过切点，用 <kbd>⇧⌘F</kbd> / <kbd>⇧⌘D</kbd> 补标上一段。</div>
+        </div>
+
+        <div class="op-side">
+          <div class="op-list">
+            <div class="op-row"><span class="op-prog"></span><span class="seg-idx mono">01</span><span class="op-meta"><span class="op-name">片段-1</span><span class="op-range">00:00 – 02:30</span></span><span class="op-badge">未标记</span></div>
+            <div class="op-row"><span class="op-prog"></span><span class="seg-idx mono">02</span><span class="op-meta"><span class="op-name">片段-2</span><span class="op-range">02:30 – 04:30</span></span><span class="op-badge">未标记</span></div>
+            <div class="op-row"><span class="op-prog"></span><span class="seg-idx mono">03</span><span class="op-meta"><span class="op-name">片段-3</span><span class="op-range">04:30 – 07:30</span></span><span class="op-badge">未标记</span></div>
+            <div class="op-row"><span class="op-prog"></span><span class="seg-idx mono">04</span><span class="op-meta"><span class="op-name">片段-4</span><span class="op-range">07:30 – 09:30</span></span><span class="op-badge">未标记</span></div>
+            <div class="op-row"><span class="op-prog"></span><span class="seg-idx mono">05</span><span class="op-meta"><span class="op-name">片段-5</span><span class="op-range">09:30 – 12:00</span></span><span class="op-badge">未标记</span></div>
+          </div>
+          <div class="op-menu" id="opMenu" aria-hidden="true">
+            <span data-type="master">母版 · MOV</span>
+            <span data-type="delivery">1080 · MP4</span>
+            <span data-type="uhd">4K · MOV</span>
+            <span data-type="audio">仅音频 · AAC</span>
+          </div>
+          <div class="op-export">
+            <span class="mono op-status" id="opStatus">待标记</span>
+            <span class="op-btn" id="opBtn">导出全部</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="op-foot">
+        <div class="op-cap" id="opCap">播放头只往前走：看到哪段结尾，就在哪里定下它的去向。</div>
+        <div class="op-stats"><span>播放<b>1</b>遍</span><span>回看<b>0</b>次</span><span>导出<b class="hot" id="opExports">0</b>次</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="export">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-no">03 / EXPORT</div>
+      <div>
+        <h2>导出参数，完全由你定。</h2>
+        <p>分辨率、码率、帧率等参数都能逐项修改，也可以用 6 档预设一键套用。机器支持硬件编码时，可以把编码交给 Apple Silicon 的媒体引擎（VideoToolbox），导出速度快数倍、功耗更低；</p>
+      </div>
+    </div>
+    <div class="export-grid reveal">
+      <div class="export-panel" id="exportPanel">
+        <div class="xp-head"><span class="mono">EXPORT SETTINGS</span><span class="mono" id="exportState">系统预设</span></div>
+        <div class="xp-hint">点按任意参数即可修改；改完可以存成模板。</div>
+        <div class="xp-rows">
+          <div class="xp-row"><span>容器</span><b data-field="container" data-edit data-options="MOV,MP4">跟随源</b></div>
+          <div class="xp-row"><span>视频编码</span><b>跟随源编码</b></div>
+          <div class="xp-row"><span>编码方式</span><b data-field="mode" data-edit data-options="硬件 · VideoToolbox,软件 · x264 / x265">软件 · x264 / x265</b></div>
+          <div class="xp-row"><span>分辨率</span><b data-field="res" data-edit data-options="跟随源,4K · 3840×2160,2.7K · 2704×1520,1080p · 1920×1080,720p · 1280×720,480p · 854×480">跟随源</b></div>
+          <div class="xp-row"><span>码率策略</span><b class="mode-wrap"><i class="mode on" data-mode="quality">质量优先</i><i class="mode" data-mode="bitrate">码率优先</i></b></div>
+          <div class="xp-row"><span>码率 / 质量</span><b class="hot" id="rateValue">CRF 18 · slow</b></div>
+          <div class="xp-row"><span>帧率</span><b data-field="fps" data-edit data-options="跟随源,60 fps,30 fps">跟随源</b></div>
+          <div class="xp-row"><span>音频</span><b>直接复制原音轨</b></div>
+          <div class="xp-row"><span>自定义参数</span><b class="custom">-movflags +faststart <em>编辑</em></b></div>
+        </div>
+        <div class="xp-actions"><span class="xp-btn">导出</span><span class="xp-btn ghost" id="saveTplBtn">存为模板</span></div>
+      </div>
+      <div class="template-panel">
+        <div class="preset-carousel" id="presetCarousel">
+          <div class="xp-head"><span class="mono">系统预设 · 内置</span><span class="mono">自由切换</span></div>
+          <div class="preset-grid" id="presetGrid">
+            <button type="button" class="preset-card on"><b>原分辨率 · 高画质</b><span>软编 · CRF 18 · slow</span></button>
+            <button type="button" class="preset-card"><b>原分辨率 · 小体积</b><span>软编 · CRF 25 · faster</span></button>
+            <button type="button" class="preset-card"><b>4K 交付</b><span>硬编优先 · 回退 CRF 20</span></button>
+            <button type="button" class="preset-card"><b>1080p 交付</b><span>软编 · CRF 20 · medium</span></button>
+            <button type="button" class="preset-card"><b>720p 分享</b><span>软编 · CRF 23 · fast</span></button>
+            <button type="button" class="preset-card"><b>480p 预览</b><span>软编 · CRF 28 · veryfast</span></button>
+          </div>
+        </div>
+        <div class="xp-head tpl-head"><span class="mono">TEMPLATES</span><span class="mono">REUSE</span></div>
+        <div class="tpl-list">
+          <div class="tpl-card applied"><b>母版</b><span>源片复制</span></div>
+          <div class="tpl-card"><b>运动相机</b><span>4K · 3840×2160 · 15 Mb/s</span></div>
+          <div class="tpl-card"><b>日常分享</b><span>1080p · CRF 20</span></div>
+          <div class="tpl-card new" id="newTpl"><b>新模板</b><span>2.7K · 2704×1520 · 质量优先</span></div>
+        </div>
+        <div class="tpl-note">一套参数存成模板，下一段直接套用；也可以从系统预设开始改。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="highlights">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-no">04 / HIGHLIGHTS</div>
+      <div>
+        <h2>精确，不靠放大时间线。</h2>
+        <p>拖进度条，很难刚好停在想要的位置。在 VShunt 里，每一步走多远由你决定：时间框按时、分、秒、厘秒逐段步进，画面上滚动则按档位步进。鼠标和键盘都有对应的操作。</p>
+      </div>
+    </div>
+
+    <div class="precision-grid reveal">
+      <article class="precision-card keyboard-mode" id="cardA">
+        <div class="pc-head"><span class="mono">A / 按段步进</span><span class="mono pc-tag">时 · 分 · 秒 · 厘秒</span></div>
+        <p class="pc-desc">鼠标停在哪一段，滚轮就调哪一段；也可以点选后用 ↑↓ 步进，Tab 换段。跨段自动进位 / 借位。</p>
+        <div class="focus-stage">
+          <div class="mini-player" id="tfPlayer" data-speed="20">
+            <div class="mp-screen" aria-hidden="true"><span class="mp-sun"></span><span class="mp-land"></span><span class="mp-label mono">A001.MOV</span></div>
+            <div class="demo-progress mp-track"><div class="progress-fill" id="tfProgress"></div><div class="progress-head" id="tfHead"></div></div>
+            <div class="mp-bar">
+              <div class="tf-big" id="tfBig">
+                <span>00</span><b>:</b><span class="hot">12</span><b>:</b><span>34</span><b>.</b><span>00</span>
+              </div>
+              <span class="mp-ctrl" aria-hidden="true">◂◂ ▶ ▸▸</span>
+              <span class="mp-total mono">00:40:00.00</span>
+            </div>
+          </div>
+          <div class="control-zone">
+            <div class="mode-slot">
+              <div class="key-row" id="tfKeys">
+                <kbd data-key="left">←</kbd><kbd data-key="up">↑</kbd><kbd data-key="down">↓</kbd><kbd data-key="right">→</kbd>
+              </div>
+              <div class="mouse-lane" id="tfMouseLane">
+                <div class="wheel-graphic" id="tfWheel"><span></span></div>
+              </div>
+            </div>
+            <div class="demo-readout" id="tfReadout">键盘：选中分钟段</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="precision-card" id="cardB">
+        <div class="pc-head"><span class="mono">B / 档位滚动</span><span class="mono pc-tag">按键 1–5 切档 · 滚轮步进</span></div>
+        <p class="pc-desc">光标在画面任意位置滚动即可步进；按 1–5 切换五档步长，每档都可以自定义。</p>
+        <div class="focus-stage">
+          <div class="mini-player" id="stepPlayer" data-speed="75">
+            <div class="mp-screen"><span class="mp-sun"></span><span class="mp-land"></span><span class="mp-label mono">A001.MOV</span>
+              <div class="wheel-group" id="stepCursor">
+                <div class="key-slot">
+                  <div class="keycap" id="stepFloat" aria-hidden="true">
+                    <div class="keycap-top"><span class="keycap-legend" id="stepFloatText">1</span></div>
+                  </div>
+                </div>
+                <div class="wheel-graphic" id="stepWheel"><span></span></div>
+                <div class="wheel-delta" id="stepDelta">+1 帧</div>
+              </div>
+            </div>
+            <div class="demo-progress mp-track"><div class="progress-fill" id="stepProgress"></div><div class="progress-head" id="stepHead"></div></div>
+            <div class="mp-bar">
+              <span class="mp-time" id="stepReadout">00:12:34.00</span>
+              <span class="mp-ctrl" aria-hidden="true">◂◂ ▶ ▸▸</span>
+              <span class="mp-total mono">00:40:00.00</span>
+            </div>
+          </div>
+          <div class="step-row" id="stepPills">
+            <span class="step-pill on"><i>1</i>1帧</span>
+            <span class="step-pill"><i>2</i>5帧</span>
+            <span class="step-pill"><i>3</i>10帧</span>
+            <span class="step-pill"><i>4</i>1秒</span>
+            <span class="step-pill"><i>5</i>2秒</span>
+          </div>
+          <div class="demo-readout" id="stepCaption">按 1：每格 1 帧</div>
+        </div>
+      </article>
+    </div>
+
+    <div class="kb-strip reveal">
+      <span class="kb-title">手不离键盘</span>
+      <span class="kb-item"><kbd>Z</kbd><kbd>C</kbd>逐帧后退 / 前进</span>
+      <span class="kb-item"><kbd>J</kbd><kbd>L</kbd>按当前档位快退 / 快进</span>
+      <span class="kb-item"><kbd>1</kbd>–<kbd>5</kbd>切换档位</span>
+      <span class="kb-note mono">快捷键可自定义</span>
+    </div>
+  </div>
+</section>
+
+<section class="perf-band" id="performance">
+  <div class="wrap">
+    <div class="perf-head reveal">
+      <div class="mono" style="color:var(--vermilion);margin-bottom:18px">05 / NATIVE · NOT A WEB VIEW</div>
+      <h2>不是套壳。<br>是原生播放器。</h2>
+      <p>播放、seek、波形和快捷键直接跑在 AVFoundation 与 AppKit 上，不经过浏览器内核。拖动、逐帧、缩放都是原生级的手感，标准只有一个：像 QuickTime Player 一样跟手。</p>
+    </div>
+    <div class="perf-compare reveal">
+      <div class="pc bad">
+        <h4>ELECTRON / WEBVIEW / 网页套壳</h4>
+        <ul>
+          <li>解码和渲染受浏览器限制，部分格式放不了，4K 高码率素材吃力</li>
+          <li>拖动和逐帧有延迟，画面跟不上手</li>
+          <li>自带一整个浏览器内核，内存占用高</li>
+        </ul>
+      </div>
+      <div class="pc good">
+        <h4>VSHUNT 原生</h4>
+        <ul>
+          <li>系统硬件解码，4K、HEVC、高码率素材也能流畅播放</li>
+          <li>拖到哪画面跟到哪，逐帧即按即到</li>
+          <li>少一层浏览器内核，更轻量</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-no">06 / FEATURES</div>
+      <div>
+        <h2>不是剪辑软件的<br>功能简化复刻版</h2>
+        <p>而是把筛片、切分、导出一次跑完的粗剪工具：时间线、字幕、波形对着看，切分即分段；留下的按段设规格导出，删掉的不占硬盘。</p>
+      </div>
+    </div>
+
+    <p class="cap-lead reveal">比剪辑软件轻<span>（几乎无感的内存占用）</span>，<br>比播放器能剪<span>（原生播放器级的筛片手感）</span>。</p>
+
+    <div class="features">
+      <article class="card reveal">
+        <span class="num">F.01</span>
+        <h3>分流只是起点，导出完全自由</h3>
+        <p>分流不只决定留不留，还决定以什么规格留：需要后期空间的就源片复制，不涉及重新编码，画质无损，导出速度也极快；只需观看的压到合适的分辨率和码率；只要声音的单独提取音频。每一段都能单独设置规格、一次全部导出，无需像传统剪辑软件那样逐段重复处理。</p>
+        <div class="tags"><span class="tag">源片复制</span><span class="tag">按段设规格</span><span class="tag">纯音频提取</span></div>
+      </article>
+      <article class="card reveal">
+        <span class="num">F.02</span>
+        <h3>时间线与波形联动</h3>
+        <p>Canvas 自绘时间线 + 波形视图，缩放、平移、播放头跟随，字幕语音区域直接标在波形上。</p>
+        <div class="tags"><span class="tag">Cmd + 滚轮缩放</span><span class="tag">快剪面板</span></div>
+      </article>
+      <article class="card reveal">
+        <span class="num">F.03</span>
+        <h3>字幕，两种后端</h3>
+        <p>云端识别更准，还能区分说话人；不想配置云端时可以用 Apple Speech 本地识别，也能导入现成字幕，或接入你自己的识别工具。</p>
+        <div class="tags"><span class="tag">SRT / VTT / JSON</span><span class="tag">兴趣点 POI</span></div>
+      </article>
+      <article class="card reveal">
+        <span class="num">F.04</span>
+        <h3>批量处理，一次配置</h3>
+        <p>同目录多选文件，批量生成代理、批量识别字幕。串行队列、逐项状态，单项失败不拖累整体。</p>
+        <div class="tags"><span class="tag">后台任务</span><span class="tag">进度胶囊</span></div>
+      </article>
+      <article class="card reveal">
+        <span class="num">F.05</span>
+        <h3>参数自由，预设省事</h3>
+        <p>分辨率、帧率、码率、硬件加速、元数据都能单独改，还能追加任意 ffmpeg 参数；调好的存成模板，下一段一键套用。</p>
+        <div class="tags"><span class="tag">自定义参数</span><span class="tag">模板复用</span><span class="tag">命令预览</span></div>
+      </article>
+      <article class="card reveal">
+        <span class="num">F.06</span>
+        <h3>原生该有的细节</h3>
+        <p>可自定义快捷键、深浅色外观、5 种界面语言、首次引导与独立教程窗口，长任务全部可以转入后台。</p>
+        <div class="tags"><span class="tag">中 / 英 / 日 / 韩 / 俄</span></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="subtitle">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-no">07 / CAPTIONS</div>
+      <div>
+        <h2>字幕可以上云，<br>也可以只留在本机。</h2>
+        <p>字幕参考可在对话场景下提升筛片效率。云端识别更准更全；不想折腾账号和存储，本地识别也能直接用。两种结果共用同一套字幕工程，随时切换，自动对轴，支持多语言。</p>
+      </div>
+    </div>
+    <div class="split reveal">
+      <div class="pane">
+        <div class="kicker">☁ 云端 / 更准更全</div>
+        <h3>豆包 ASR</h3>
+        <p>识别更准，长素材也稳定；除了文字，还能标出说话人、情绪等信息，多人对话的素材按人筛选更方便。需要自行配置豆包 API Key 与对象存储（OSS / TOS），音频上传到你自己的存储，识别完自动清理。</p>
+        <ul>
+          <li>准确率更高，适合正式选片</li>
+          <li>说话人、情绪、音量等扩展信息</li>
+          <li>凭证保存在系统钥匙串</li>
+        </ul>
+      </div>
+      <div class="pane">
+        <div class="kicker">● 本地 / 零配置</div>
+        <h3>Apple Speech</h3>
+        <p>不想配置云端时的另一个选择：使用系统语音识别，不需要账号或 API Key，音频不离开本机。首次使用会下载对应语言的系统语音资源。</p>
+        <ul>
+          <li>零配置，打开就能用</li>
+          <li>适合隐私敏感的素材</li>
+          <li>只识别文字，不区分说话人</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="more-captions">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-no">08 / MORE WAYS</div>
+      <div>
+        <h2>已有字幕，<br>或者想用自己的工具？</h2>
+        <p>字幕不一定要在 VShunt 里识别，结果都能导进来，和本地、云端识别一样用于选片。</p>
+      </div>
+    </div>
+    <div class="split reveal">
+      <div class="pane">
+        <div class="kicker">↧ 导入</div>
+        <h3>导入现成字幕</h3>
+        <p>手上已经有字幕文件，直接导入 SRT / VTT 或规范 JSON。导入前会先校验，并告诉你这份字幕带了哪些信息（词级时间、说话人等），确认无误再替换。</p>
+        <ul>
+          <li>SRT / VTT / 规范 JSON</li>
+          <li>导入前校验，有问题会提示修正</li>
+          <li>自动识别字幕携带的信息</li>
+        </ul>
+      </div>
+      <div class="pane">
+        <div class="kicker">⇄ 手动</div>
+        <h3>手动识别</h3>
+        <p>想用 Whisper 或其他识别工具？VShunt 帮你导出音频，并在同目录生成结果模板；用你的工具跑完填回模板，或者直接导入它输出的 SRT / VTT。</p>
+        <ul>
+          <li>三步：导出音频 → 生成结果 → 导入结果</li>
+          <li>结果模板自动生成</li>
+          <li>任意识别工具都能接入</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-no">09 / INSTALL</div>
+      <div>
+        <h2>下载，拖进去，打开。</h2>
+        <p>解码与编码能力已经打包进 App，不需要 Homebrew，也不需要额外的命令行工具。</p>
+      </div>
+    </div>
+    <div class="install">
+      <div class="reveal">
+        <div class="req">
+          <dl>
+            <dt>系统</dt><dd>macOS 26.0 及以上</dd>
+            <dt>芯片</dt><dd>Apple Silicon（M1 及以上）</dd>
+            <dt>依赖</dt><dd>无需安装 · ffmpeg / ffprobe 已内置</dd>
+            <dt>安装包</dt><dd>DMG，约 75 MB</dd>
+            <dt>语言</dt><dd>简体中文 / English / 日本語 / 한국어 / Русский</dd>
+          </dl>
+        </div>
+        <div class="note">首次打开如果提示「无法验证开发者」，先点「完成」关掉提示，再打开「系统设置 → 隐私与安全性」，在页面下方点「仍要打开」，输入密码确认即可。完成公证的版本可直接双击打开。</div>
+      </div>
+      <div class="reveal">
+        <ol class="ol">
+          <li><strong>下载 DMG</strong>点击页面上的下载按钮，保存到「下载」文件夹。</li>
+          <li><strong>拖入应用程序</strong>双击打开 DMG，把 VShunt 拖到 Applications 文件夹。</li>
+          <li><strong>打开并导入视频</strong>拖入任意 mp4 / mov，按 X 切分，时间线会自动生成片段。</li>
+          <li><strong>试一次本地字幕</strong>字幕面板 → 识别后端选 Apple Speech（本地）→ 选择语言 → 开始识别。</li>
+        </ol>
+        <div style="margin-top:26px">
+          <a class="btn" href="#download" data-download>下载 VShunt
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v13m0 0l-5-5m5 5l5-5M4 21h16"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="platforms">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-no">10 / PLATFORMS</div>
+      <div>
+        <h2>先把它在 macOS 上做对。</h2>
+        <p>VShunt 的体验建立在帧级 seek、波形实时渲染和系统级快捷键上。第一版选择原生实现，是为了先把这套交互打磨到可用，而不是把界面套进一个跨平台壳里。</p>
+      </div>
+    </div>
+    <div class="split reveal">
+      <div class="pane local">
+        <div class="kicker">● 现在可用</div>
+        <h3>macOS</h3>
+        <p>Swift + SwiftUI + AVFoundation 原生实现，播放、时间线、波形和快捷键都直接跑在系统框架上。</p>
+        <ul>
+          <li>macOS 26.0 及以上，Apple Silicon</li>
+          <li>无需安装额外依赖，下载即用</li>
+          <li>源片复制、预设、自定义规格与纯音频，按需分流导出</li>
+        </ul>
+        <div style="margin-top:26px">
+          <a class="btn" href="#download" data-download>下载 macOS 版
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v13m0 0l-5-5m5 5l5-5M4 21h16"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="pane" style="background:linear-gradient(160deg,#121214,#0d0d0f)">
+        <div class="kicker">○ 规划中</div>
+        <h3>Windows</h3>
+        <p>会按同样的标准做原生重做，而不是简单移植界面。播放器、波形、帧级定位和批量分流都会重新实现。</p>
+        <ul>
+          <li>原生播放与帧级 seek，不依赖浏览器内核</li>
+          <li>时间线、波形与快捷键按 Windows 习惯重做</li>
+          <li>具体时间与系统要求确定后在本页公布</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-no">11 / FAQ</div>
+      <div><h2>几个常见问题。</h2></div>
+    </div>
+    <div class="reveal">
+      <details>
+        <summary>和 Electron / WebView 套壳工具有什么区别？</summary>
+        <p>VShunt 的播放、seek、波形和快捷键直接调用 AVFoundation / AppKit，不经过浏览器内核。用起来的区别是：拖动时间线画面随手走，逐帧和滚轮微调即按即到、不回弹。早期的 WebView 版本在这些地方达不到要求，所以改用 Swift 原生重写。</p>
+      </details>
+      <details>
+        <summary>会有 Windows 版吗？</summary>
+        <p>会，但不会简单移植。Windows 版需要重做播放器、波形、帧级 seek 与快捷键，具体时间与系统要求确定后会在本页公布。</p>
+      </details>
+      <details>
+        <summary>会帮我删掉原片吗？</summary>
+        <p>不会。VShunt 只做标记和导出，删除权始终在你手里。你可以先按分流结果把需要的片段全部导出，确认无误后再自己清理原片。</p>
+      </details>
+      <details>
+        <summary>必须配置 API Key 才能用吗？</summary>
+        <p>不必须。切分、片段管理、时间线、波形、导出以及 Apple Speech 本地字幕识别都可以直接使用。只有豆包云端识别与 OSS / TOS 存储需要自行配置凭证。</p>
+      </details>
+      <details>
+        <summary>我的视频会被上传吗？</summary>
+        <p>本地识别路径不会上传音频。选择豆包云端识别时，音频会上传到你自己配置的对象存储，识别结束自动删除远端音频对象；视频文件本身不会被上传。</p>
+      </details>
+      <details>
+        <summary>支持哪些输入和输出格式？</summary>
+        <p>输入推荐 mp4 / mov，常见格式基本都能打开。不需要压缩的片段直接复制原片；需要压缩时按源视频的编码重新编码（H.264 素材输出 H.264，HEVC 素材输出 HEVC），容器可选 MP4 或 MOV，分辨率、帧率、码率都能自定义，也内置了原分辨率高画质 / 小体积、4K、1080p、720p、480p 六档场景预设，按源分辨率限制不放大；4K 交付在硬件可用时自动走硬编，否则回退软编。纯音频直接复制原音轨，格式跟随源文件，常见为 AAC。</p>
+      </details>
+      <details>
+        <summary>为什么要求 macOS 26.0？</summary>
+        <p>本地字幕识别依赖系统的 SpeechAnalyzer 语音框架，它从 macOS 26.0 才开始提供，因此最低系统版本为 macOS 26.0。</p>
+      </details>
+      <details>
+        <summary>如何卸载？</summary>
+        <p>把 Applications 中的 VShunt 移到废纸篓即可。工程数据、模板与配置保存在 <code>~/Library/Application Support/VShunt</code>，如需彻底清理可一并删除。</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section id="download" class="dl-band">
+  <div class="wrap dl-inner">
+    <div>
+      <div class="mono" style="margin-bottom:22px">GET VSHUNT / v1.0.0</div>
+      <h2>下一次粗剪，<br>从这里开始。</h2>
+      <div class="small">macOS 26.0+ · Apple Silicon · DMG 约 75 MB</div>
+    </div>
+    <a class="btn" href="#" data-download>下载 VShunt
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v13m0 0l-5-5m5 5l5-5M4 21h16"/></svg>
+    </a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">VShunt<span>.</span><br>只为好片留空间，<br>不为废片留位置。</div>
+      </div>
+      <div class="foot-col">
+        <h4>PRODUCT</h4>
+        <a href="#features">功能</a>
+        <a href="#workflow">工作流</a>
+        <a href="#install">安装说明</a>
+        <a href="#download" data-download>下载</a>
+      </div>
+      <div class="foot-col">
+        <h4>DETAILS</h4>
+        <p>版本 1.0.0</p>
+        <p>macOS 26.0+</p>
+        <p>Apple Silicon</p>
+        <p>Windows：规划中</p>
+      </div>
+      <div class="foot-col">
+        <h4>LINKS</h4>
+        <a href="https://github.com/timehijack/VShunt" target="_blank" rel="noopener">GitHub 主页</a>
+        <a href="https://github.com/timehijack/VShunt/releases" target="_blank" rel="noopener">发布与下载</a>
+        <a href="https://github.com/timehijack/VShunt/issues" target="_blank" rel="noopener">问题反馈</a>
+      </div>
+    </div>
+    <div class="legal">
+      <span>© 2026 VShunt. 保留所有权利。</span>
+      <span>内置 ffmpeg 为 GPLv2+ 组件，许可证随包提供；完整源码与构建脚本见 GitHub Release：github.com/timehijack/VShunt/releases/tag/ffmpeg-8.0.1。</span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast">下载地址尚未配置</div>
+
+<script>
+  var DOWNLOAD_URL = "https://github.com/timehijack/VShunt/releases/latest";
+
+  var nav = document.getElementById('nav');
+  var bar = document.getElementById('progress');
+  var toast = document.getElementById('toast');
+  var toastTimer;
+
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toast.classList.remove('show'); }, 2400);
+  }
+
+  document.querySelectorAll('[data-download]').forEach(function(el){
+    el.setAttribute('href', DOWNLOAD_URL);
+    el.addEventListener('click', function(e){
+      if (!DOWNLOAD_URL){
+        e.preventDefault();
+        showToast('下载地址尚未配置');
+        return;
+      }
+      el.setAttribute('href', DOWNLOAD_URL);
+    });
+  });
+
+  var navToggle = document.getElementById('navToggle');
+  function setNavOpen(open){
+    nav.classList.toggle('open', open);
+    navToggle.setAttribute('aria-expanded', String(open));
+  }
+  navToggle.addEventListener('click', function(){ setNavOpen(!nav.classList.contains('open')); });
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ setNavOpen(false); });
+  });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') setNavOpen(false); });
+
+  function onScroll(){
+    var h = document.documentElement;
+    var max = h.scrollHeight - h.clientHeight;
+    bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+    nav.classList.toggle('scrolled', h.scrollTop > 8);
+  }
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if (en.isIntersecting){
+        en.target.classList.add('in');
+        io.unobserve(en.target);
+      }
+    });
+  }, {threshold:.12, rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.reveal').forEach(function(el, i){
+    el.style.transitionDelay = Math.min(i % 4, 3) * 60 + 'ms';
+    io.observe(el);
+  });
+
+  // 循环动画的视口门控：进入视口才启动，离开立即中止，重新进入从第一帧重播
+  var ABORT = 'aborted';
+  function loopInView(el, run, opts){
+    opts = opts || {};
+    var token = 0, onScreen = false;
+    function start(){
+      var mine = ++token;
+      var p = run(function(){ return mine === token; });
+      if (p && p.catch) p.catch(function(){});
+    }
+    function stop(){
+      token++;
+      if (opts.stop) opts.stop();
+    }
+    if (!el) return;
+    if ('IntersectionObserver' in window){
+      new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if (e.isIntersecting && !onScreen){ onScreen = true; start(); }
+          else if (!e.isIntersecting && onScreen){ onScreen = false; stop(); }
+        });
+      }, {threshold: opts.threshold == null ? .35 : opts.threshold}).observe(el);
+    } else {
+      onScreen = true;
+      start();
+    }
+  }
+
+  // highlights + export auto demos
+  (function(){
+    function sleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+    function p2(n){ return String(n).padStart(2, '0'); }
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var TOTAL = 40 * 60;
+
+    // 播放器缩影：所有图层由同一个时间值驱动，按视差速度平移（近快远慢，太阳最慢），
+    // 时间增大时画面整体向左移动。data-speed 为最近一层（标杆）每秒移动的像素数。
+    var T0 = 12 * 60 + 34;
+    function drawScreen(player, t, speed){
+      var d = (t - T0) * speed;
+      var land = player.querySelector('.mp-land');
+      land.style.setProperty('--post', -d + 'px');
+      land.style.setProperty('--near', -d * 0.6 + 'px');
+      land.style.setProperty('--far', -d * 0.25 + 'px');
+      player.querySelector('.mp-sun').style.setProperty('--sun', 130 - d * 0.06 + 'px');
+    }
+    // 小步进直接跟随；大跨度跳转（如按分钟）用补间平移，保证运动方向可辨认
+    function paintScreen(player, t){
+      if (!player) return;
+      var speed = +player.dataset.speed || 60;
+      if (player._raf){ cancelAnimationFrame(player._raf); player._raf = 0; }
+      if (player._shown == null || reduce || Math.abs(t - player._shown) * speed < 40){
+        player._shown = t;
+        drawScreen(player, t, speed);
+        return;
+      }
+      var from = player._shown, start = performance.now();
+      function tick(now){
+        var p = Math.min(1, (now - start) / 420);
+        var e = 1 - Math.pow(1 - p, 3);
+        player._shown = from + (t - from) * e;
+        drawScreen(player, player._shown, speed);
+        player._raf = p < 1 ? requestAnimationFrame(tick) : 0;
+      }
+      player._raf = requestAnimationFrame(tick);
+    }
+
+    // A: 按段步进
+    (function(){
+      var big = document.getElementById('tfBig');
+      if (!big) return;
+      var spans = Array.prototype.slice.call(big.querySelectorAll('span'));
+      var keys = document.getElementById('tfKeys');
+      var readout = document.getElementById('tfReadout');
+      var wheel = document.getElementById('tfWheel');
+      var fill = document.getElementById('tfProgress');
+      var head = document.getElementById('tfHead');
+      var player = document.getElementById('tfPlayer');
+      var cardA = document.getElementById('cardA');
+      var lane = document.getElementById('tfMouseLane');
+      var parts = [0, 12, 34, 0];
+      var active = 1;
+      var alive = function(){ return true; };
+      function sleep(ms){
+        var my = alive;
+        return new Promise(function(res, rej){
+          setTimeout(function(){ my() ? res() : rej(ABORT); }, ms);
+        });
+      }
+
+      function seconds(){
+        return parts[0] * 3600 + parts[1] * 60 + parts[2] + parts[3] / 100;
+      }
+      function pct(){
+        return Math.max(0, Math.min(100, seconds() / TOTAL * 100));
+      }
+      function positionMouse(){
+        if (!lane) return;
+        var s = spans[active];
+        if (!s) return;
+        var laneRect = lane.getBoundingClientRect();
+        var r = s.getBoundingClientRect();
+        var cx = r.left + r.width / 2 - laneRect.left;
+        if (wheel) wheel.style.left = (cx - 17) + 'px';
+        if (keys){
+          var half = keys.offsetWidth / 2;
+          keys.style.left = Math.max(half, Math.min(laneRect.width - half, cx)) + 'px';
+        }
+      }
+      function setMode(mode){
+        if (!cardA) return;
+        cardA.classList.toggle('mouse-mode', mode === 'mouse');
+        cardA.classList.toggle('keyboard-mode', mode === 'key');
+        positionMouse();
+      }
+      function render(popIndex){
+        spans.forEach(function(s, i){
+          s.textContent = p2(parts[i]);
+          s.classList.toggle('hot', i === active);
+        });
+        var p = pct();
+        fill.style.width = p + '%';
+        head.style.left = p + '%';
+        paintScreen(player, seconds());
+        positionMouse();
+        if (popIndex != null){
+          var el = spans[popIndex];
+          el.classList.remove('pop');
+          void el.offsetWidth;
+          el.classList.add('pop');
+          setTimeout(function(){ el.classList.remove('pop'); }, 400);
+        }
+      }
+      function press(key){
+        var el = keys.querySelector('[data-key="' + key + '"]');
+        if (!el) return;
+        el.classList.add('press');
+        setTimeout(function(){ el.classList.remove('press'); }, 260);
+      }
+      async function wheelScroll(seg, delta, duration){
+        var start = parts[seg];
+        var target = start + delta;
+        wheel.classList.add('scroll');
+        var activeSpan = spans[active];
+        if (activeSpan) activeSpan.classList.add('scrolling');
+        var t0 = performance.now();
+        while (true){
+          var p = Math.min(1, (performance.now() - t0) / duration);
+          var v = start + Math.min(delta, Math.floor(p * delta) + 1);
+          if (v !== parts[seg]){
+            parts[seg] = v;
+            render();
+          }
+          if (p >= 1) break;
+          await sleep(40);
+        }
+        parts[seg] = target;
+        render();
+        wheel.classList.remove('scroll');
+        if (activeSpan) activeSpan.classList.remove('scrolling');
+      }
+
+      async function loop(){
+        while (alive()){
+          setMode('key');
+          parts = [0, 12, 34, 0]; active = 1; render();
+          readout.textContent = '键盘：选中分钟段';
+          await sleep(1100);
+          press('right'); active = 2; render();
+          readout.textContent = '键盘：→ 换到秒段';
+          await sleep(900);
+          for (var i = 0; i < 3; i++){
+            press('down');
+            parts[2] += 1;
+            render(2);
+            readout.textContent = '键盘：↓ 每次 +1 秒';
+            await sleep(700);
+          }
+          await sleep(500);
+          setMode('mouse');
+          active = 1; render();
+          readout.textContent = '鼠标：停在分钟段';
+          await sleep(900);
+          readout.textContent = '滚轮：每格 1 分钟';
+          await wheelScroll(1, 3, 1600);
+          await sleep(800);
+          active = 3; render();
+          readout.textContent = '鼠标：停在厘秒段';
+          await sleep(800);
+          readout.textContent = '滚轮：每格 0.01 秒';
+          await wheelScroll(3, 25, 1600);
+          await sleep(1300);
+        }
+      }
+
+      if (reduce){ render(); return; }
+      loopInView(cardA, function(aliveFn){
+        alive = aliveFn;
+        wheel.classList.remove('scroll');
+        spans.forEach(function(s){ s.classList.remove('scrolling'); });
+        keys.querySelectorAll('kbd').forEach(function(k){ k.classList.remove('press'); });
+        parts = [0, 12, 34, 0]; active = 1; render();
+        return loop();
+      }, {threshold:.35});
+    })();
+
+    // B: 档位滚动
+    (function(){
+      var pills = Array.prototype.slice.call(document.querySelectorAll('#stepPills .step-pill'));
+      var floatKey = document.getElementById('stepFloat');
+      var floatKeyText = document.getElementById('stepFloatText');
+      var readout = document.getElementById('stepReadout');
+      var delta = document.getElementById('stepDelta');
+      var wheel = document.getElementById('stepWheel');
+      var caption = document.getElementById('stepCaption');
+      var fill = document.getElementById('stepProgress');
+      var head = document.getElementById('stepHead');
+      var player = document.getElementById('stepPlayer');
+      var cursor = document.getElementById('stepCursor');
+      if (!pills.length) return;
+      var alive = function(){ return true; };
+      function sleep(ms){
+        var my = alive;
+        return new Promise(function(res, rej){
+          setTimeout(function(){ my() ? res() : rej(ABORT); }, ms);
+        });
+      }
+      // 每轮光标落在画面的不同位置：x 为画面宽度占比，y 为高度占比
+      var spots = [[0.3, 50], [0.56, 40], [0.74, 58]];
+      var steps = [1, 5, 10, 30, 60];
+      var labels = ['+1 帧', '+5 帧', '+10 帧', '+1 秒', '+2 秒'];
+      var names = ['1 帧', '5 帧', '10 帧', '1 秒', '2 秒'];
+      var idxs = [0, 2, 4];
+      var fps = 30;
+      var base = (12 * 60 + 34) * fps;
+      var frame = base;
+      var SPAN = 8;
+
+      function fmt(){
+        var cs = Math.floor((frame % fps) * 100 / fps);
+        var total = Math.floor(frame / fps);
+        var s = total % 60;
+        var m = Math.floor(total / 60) % 60;
+        var h = Math.floor(total / 3600) % 24;
+        return p2(h) + ':' + p2(m) + ':' + p2(s) + '.' + p2(cs);
+      }
+      function pct(){
+        var sec = frame / fps;
+        return Math.max(0, Math.min(100, ((sec - (12 * 60 + 34)) / SPAN) * 100));
+      }
+      function render(){
+        readout.textContent = fmt();
+        var p = pct();
+        fill.style.width = p + '%';
+        head.style.left = p + '%';
+        paintScreen(player, frame / fps);
+      }
+      function select(i){
+        pills.forEach(function(p, j){ p.classList.toggle('on', j === i); });
+      }
+      function moveCursor(k){
+        if (!cursor) return;
+        var screen = cursor.parentNode;
+        var w = screen.clientWidth;
+        var spot = spots[k % spots.length];
+        // 左侧留出键帽、右侧留出步长提示的空间
+        var x = Math.max(100, Math.min(w - 90, w * spot[0]));
+        cursor.style.left = x + 'px';
+        cursor.style.top = spot[1] + '%';
+      }
+      async function pressKey(i){
+        floatKeyText.textContent = String(i + 1);
+        floatKey.classList.add('show');
+        await sleep(320);
+        select(i);
+        floatKey.classList.add('pressed');
+        pills[i].classList.add('keypress');
+        await sleep(140);
+        floatKey.classList.remove('pressed');
+        setTimeout(function(){ pills[i].classList.remove('keypress'); }, 180);
+        await sleep(160);
+        floatKey.classList.remove('show');
+      }
+      async function scrollSteps(i, duration){
+        var start = frame;
+        var target = frame + steps[i] * 3;
+        delta.textContent = labels[i] + ' ×3';
+        delta.classList.add('on');
+        wheel.classList.add('scroll');
+        var t0 = performance.now();
+        while (true){
+          var p = Math.min(1, (performance.now() - t0) / duration);
+          var eased = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+          frame = Math.round(start + (target - start) * eased);
+          render();
+          if (p >= 1) break;
+          await sleep(40);
+        }
+        frame = target;
+        render();
+        wheel.classList.remove('scroll');
+        delta.classList.remove('on');
+      }
+
+      async function loop(){
+        while (alive()){
+          frame = base; select(0); render();
+          for (var k = 0; k < idxs.length; k++){
+            var i = idxs[k];
+            moveCursor(k);
+            caption.textContent = '按 ' + (i + 1) + '：每格 ' + names[i];
+            await sleep(600);
+            await pressKey(i);
+            await sleep(440);
+            caption.textContent = '在画面上滚动 3 格';
+            await scrollSteps(i, 2000);
+            await sleep(900);
+          }
+          caption.textContent = '档位决定每格走多远';
+          await sleep(900);
+          frame = base;
+          render();
+          await sleep(700);
+        }
+      }
+
+      if (reduce){ select(0); render(); moveCursor(0); return; }
+      loopInView(document.getElementById('cardB'), function(aliveFn){
+        alive = aliveFn;
+        wheel.classList.remove('scroll');
+        delta.classList.remove('on');
+        floatKey.classList.remove('show');
+        floatKey.classList.remove('pressed');
+        pills.forEach(function(p){ p.classList.remove('keypress'); });
+        frame = base; select(0); render(); moveCursor(0);
+        return loop();
+      }, {threshold:.35});
+    })();
+
+    // 导出模板：新模板进入模板库
+    (function(){
+      var tpl = document.getElementById('newTpl');
+      if (!tpl) return;
+      if (reduce){ tpl.classList.add('on'); return; }
+      loopInView(tpl, function(alive){
+        return new Promise(function(done){
+          function cycle(){
+            if (!alive()){ done(); return; }
+            tpl.classList.add('on');
+            setTimeout(function(){
+              if (!alive()){ done(); return; }
+              tpl.classList.remove('on');
+              setTimeout(function(){ if (alive()) cycle(); else done(); }, 1600);
+            }, 2600);
+          }
+          setTimeout(cycle, 1200);
+        });
+      }, {threshold:.4});
+    })();
+  })();
+
+  // export: system preset carousel + editable params
+  (function(){
+    var grid = document.getElementById('presetGrid');
+    var panel = document.getElementById('exportPanel');
+    var state = document.getElementById('exportState');
+    var saveBtn = document.getElementById('saveTplBtn');
+    var rateValue = document.getElementById('rateValue');
+    var carousel = document.getElementById('presetCarousel');
+    if (!grid || !panel) return;
+    var cards = Array.prototype.slice.call(grid.children);
+    var SOFT = '软件 · x264 / x265';
+    var presets = [
+      { res:'跟随源', rate:'CRF 18 · slow' },
+      { res:'跟随源', rate:'CRF 25 · faster' },
+      { res:'4K · 3840×2160', rate:'CRF 20 · medium' },
+      { res:'1080p · 1920×1080', rate:'CRF 20 · medium' },
+      { res:'720p · 1280×720', rate:'CRF 23 · fast' },
+      { res:'480p · 854×480', rate:'CRF 28 · veryfast' }
+    ];
+    var idx = 0;
+    var autoTimer = null;
+    var manual = false;
+
+    function field(name){ return panel.querySelector('[data-field="' + name + '"]'); }
+
+    function isHardware(){
+      var el = field('mode');
+      return !!el && el.textContent.indexOf('硬件') === 0;
+    }
+    function strategy(){
+      var on = panel.querySelector('.mode.on');
+      return on ? on.dataset.mode : 'quality';
+    }
+    function updateRate(){
+      if (!rateValue) return;
+      var bitrate = strategy() === 'bitrate';
+      rateValue.textContent = isHardware()
+        ? (bitrate ? '12 Mb/s · 平均码率' : '质量 60 · 恒定质量')
+        : (bitrate ? '12 Mb/s · 恒定码率' : 'CRF 18');
+    }
+
+    function apply(i){
+      idx = i;
+      var p = presets[i];
+      var values = { container:'跟随源', mode:p.mode || SOFT, res:p.res, fps:'跟随源' };
+      Object.keys(values).forEach(function(k){
+        var el = field(k);
+        if (el) el.textContent = values[k];
+      });
+      if (rateValue) rateValue.textContent = p.rate;
+      field('mode').classList.remove('ok');
+      panel.querySelectorAll('.mode').forEach(function(c){
+        c.classList.toggle('on', c.dataset.mode === 'quality');
+      });
+      cards.forEach(function(c, j){ c.classList.toggle('on', j === i); });
+      manual = false;
+      if (state) state.textContent = '系统预设';
+      if (saveBtn) saveBtn.classList.remove('dirty');
+    }
+
+    cards.forEach(function(c, i){
+      c.addEventListener('mouseenter', function(){
+        stopAuto();
+        apply(i);
+      });
+      c.addEventListener('click', function(){
+        stopAuto();
+        apply(i);
+      });
+    });
+
+    function stopAuto(){
+      clearInterval(autoTimer);
+      autoTimer = null;
+    }
+    function startAuto(){
+      stopAuto();
+      if (manual) return;
+      autoTimer = setInterval(function(){ apply((idx + 1) % cards.length); }, 1500);
+    }
+    if (carousel){
+      carousel.addEventListener('mouseenter', stopAuto);
+      carousel.addEventListener('mouseleave', function(){ if (!manual) startAuto(); });
+    }
+
+    panel.querySelectorAll('[data-edit]').forEach(function(el){
+      el.addEventListener('click', function(){
+        var opts = (el.dataset.options || '').split(',');
+        if (opts.length < 2) return;
+        var cur = el.textContent.trim();
+        var pos = opts.indexOf(cur);
+        el.textContent = opts[(pos + 1) % opts.length];
+        if (el.dataset.field === 'mode'){
+          el.classList.toggle('ok', isHardware());
+          updateRate();
+        }
+        manual = true;
+        stopAuto();
+        if (state) state.textContent = '已修改 · 可存为模板';
+        if (saveBtn) saveBtn.classList.add('dirty');
+      });
+    });
+
+    panel.querySelectorAll('.mode').forEach(function(chip){
+      chip.addEventListener('click', function(){
+        panel.querySelectorAll('.mode').forEach(function(c){ c.classList.remove('on'); });
+        chip.classList.add('on');
+        updateRate();
+        manual = true;
+        stopAuto();
+        if (state) state.textContent = '已修改 · 可存为模板';
+        if (saveBtn) saveBtn.classList.add('dirty');
+      });
+    });
+
+    if (saveBtn){
+      saveBtn.addEventListener('click', function(){
+        var old = saveBtn.textContent;
+        saveBtn.textContent = '已保存到模板';
+        setTimeout(function(){ saveBtn.textContent = old; }, 1800);
+      });
+    }
+
+    apply(0);
+    if (carousel && 'IntersectionObserver' in window){
+      new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if (e.isIntersecting){
+            if (!manual){ apply(0); startAuto(); }
+          } else {
+            stopAuto();
+          }
+        });
+      }, {threshold:.3}).observe(carousel);
+    } else if (carousel){
+      startAuto();
+    }
+  })();
+
+  // workflow: one-pass demo (Cmd+F 保留 / Cmd+D 废弃)
+  (function(){
+    var root = document.getElementById('onepass');
+    if (!root) return;
+    var playhead = document.getElementById('opPlayhead');
+    var tcEl = document.getElementById('opTc');
+    var toast = document.getElementById('opToast');
+    var log = document.getElementById('opLog');
+    var cap = document.getElementById('opCap');
+    var btn = document.getElementById('opBtn');
+    var status = document.getElementById('opStatus');
+    var exportsEl = document.getElementById('opExports');
+    var marks = Array.prototype.slice.call(root.querySelectorAll('.x-mark'));
+    var regions = Array.prototype.slice.call(root.querySelectorAll('.op-region'));
+    var rows = Array.prototype.slice.call(root.querySelectorAll('.op-row'));
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var TOTAL = 720;
+    var BOUNDS = [0, 150, 270, 450, 570, 720];
+    // 每段的标记：f = ⌘F 保留（默认母版），d = ⌘D 废弃；name 为列表中改的名称，type 为最终导出类型（与顶部动画一致）
+    // 最后一段在播放中（LAST_AT）直接标记
+    var PLAN = [
+      { k:'f', name:'高光', type:'master' },
+      { k:'f', name:'花絮', type:'delivery' },
+      { k:'d', name:'', type:'discard' },
+      { k:'f', name:'空镜', type:'uhd' },
+      { k:'f', name:'仅对话', type:'audio' }
+    ];
+    var LAST_AT = 660;
+    var DEFAULT_TYPE = 'master';
+    var TYPE_NAME = { master:'母版' };
+    var TYPE_BADGE = { master:'母版 · MOV', delivery:'1080 · MP4', uhd:'4K · MOV', audio:'仅音频 · AAC' };
+    var DROP_BADGE = '废弃 · 忽略';
+    var PLAY_MS = 7200;
+    var menu = document.getElementById('opMenu');
+    var menuItems = Array.prototype.slice.call(menu.querySelectorAll('span'));
+    var t = 0;
+    var toastTimer = 0;
+    var alive = function(){ return true; };
+
+    function sleep(ms){
+      var my = alive;
+      return new Promise(function(res, rej){
+        setTimeout(function(){ my() ? res() : rej(ABORT); }, ms);
+      });
+    }
+    function p2(n){ return String(n).padStart(2, '0'); }
+    function fmt(sec){
+      var s = Math.floor(sec);
+      return '00:' + p2(Math.floor(s / 60)) + ':' + p2(s % 60) + '.' + p2(Math.floor((sec - s) * 100));
+    }
+    function short(sec){ return p2(Math.floor(sec / 60)) + ':' + p2(Math.floor(sec) % 60); }
+    function range(i){ return '[' + fmt(BOUNDS[i]) + '-' + fmt(BOUNDS[i + 1]) + ']'; }
+    // 与 App 一致：切点上归后一片段
+    function segAt(sec){
+      for (var i = BOUNDS.length - 2; i >= 0; i--) if (sec >= BOUNDS[i]) return i;
+      return 0;
+    }
+    function badge(i){ return rows[i].querySelector('.op-badge'); }
+    function setBadge(i, text, pop){
+      var b = badge(i);
+      b.textContent = text;
+      if (!pop) return;
+      b.classList.remove('pop');
+      void b.offsetWidth;
+      b.classList.add('pop');
+    }
+
+    function setTime(sec){
+      t = sec;
+      playhead.style.left = (sec / TOTAL * 100) + '%';
+      tcEl.textContent = fmt(sec);
+      var cur = sec >= TOTAL ? -1 : segAt(sec);
+      rows.forEach(function(r, i){ r.classList.toggle('viewing', i === cur); });
+      // 未切分、未标记的片段只高亮到播放头为止（终点要等按下 X 才确定）；已切分或已标记的按真实范围
+      regions.forEach(function(r, i){
+        var viewing = i === cur;
+        var open = viewing && !r.classList.contains('keep') && !r.classList.contains('drop');
+        r.classList.toggle('viewing', viewing);
+        r.style.width = ((open ? sec : BOUNDS[i + 1]) - BOUNDS[i]) / TOTAL * 100 + '%';
+      });
+    }
+    function setRange(i, end){
+      rows[i].querySelector('.op-range').textContent = short(BOUNDS[i]) + ' – ' + short(end);
+    }
+    function playTo(target){
+      var from = t, ms = (target - from) / TOTAL * PLAY_MS;
+      return new Promise(function(done, fail){
+        var start = performance.now();
+        function tick(now){
+          if (!alive()){ fail(ABORT); return; }
+          var p = Math.max(0, Math.min(1, (now - start) / ms));
+          setTime(from + (target - from) * p);
+          if (p < 1) requestAnimationFrame(tick); else done();
+        }
+        requestAnimationFrame(tick);
+      });
+    }
+    function chip(text, cls){
+      var c = document.createElement('span');
+      c.className = 'op-chip ' + cls;
+      c.textContent = text;
+      log.appendChild(c);
+    }
+    function press(k){
+      var el = root.querySelector('.op-key[data-k="' + k + '"]');
+      el.classList.add('press');
+      setTimeout(function(){ el.classList.remove('press'); }, 280);
+      chip(k === 'x' ? 'X' : '⌘' + k.toUpperCase(), k);
+    }
+    function showToast(text, rangeText){
+      toast.innerHTML = '';
+      toast.appendChild(document.createTextNode(text + ' '));
+      var m = document.createElement('span');
+      m.className = 'mono';
+      m.textContent = rangeText;
+      toast.appendChild(m);
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function(){ toast.classList.remove('show'); }, 1500);
+    }
+    function setType(i, type){
+      rows[i].dataset.type = type;
+      regions[i].dataset.type = type;
+    }
+    function count(cls){ return rows.filter(function(r){ return r.classList.contains(cls); }).length; }
+    function mark(i, k){
+      var keep = k === 'f';
+      rows[i].classList.add(keep ? 'keep' : 'drop');
+      regions[i].classList.add(keep ? 'keep' : 'drop');
+      if (keep) setType(i, DEFAULT_TYPE);
+      setBadge(i, keep ? TYPE_BADGE[DEFAULT_TYPE] : DROP_BADGE, true);
+      showToast((keep ? '已标记' + TYPE_NAME[DEFAULT_TYPE] : '已废弃') + ' 片段-' + (i + 1), range(i));
+      status.textContent = count('keep') + ' 段待导出 · ' + count('drop') + ' 段废弃';
+    }
+    // 双击名称进入编辑，逐字输入新名称
+    async function rename(i, name){
+      var n = rows[i].querySelector('.op-name');
+      cap.textContent = '双击名称：改成「' + name + '」。';
+      n.classList.add('dbl');
+      await sleep(320);
+      n.classList.remove('dbl');
+      n.classList.add('editing');
+      n.textContent = '';
+      await sleep(160);
+      for (var c = 0; c < name.length; c++){
+        n.textContent += name.charAt(c);
+        await sleep(110);
+      }
+      await sleep(220);
+      n.classList.remove('editing');
+    }
+    // 点击行内导出类型，从菜单中改选规格
+    async function pickType(i, type){
+      var b = badge(i);
+      var label = TYPE_BADGE[type];
+      cap.textContent = '点导出类型：改为 ' + label + '。';
+      var cur = menuItems.findIndex(function(m){ return m.dataset.type === rows[i].dataset.type; });
+      var to = menuItems.findIndex(function(m){ return m.dataset.type === type; });
+      menuItems.forEach(function(m, j){ m.classList.toggle('hl', j === cur); });
+      menu.style.top = (rows[i].offsetTop + rows[i].offsetHeight - 4) + 'px';
+      b.classList.add('click');
+      await sleep(160);
+      menu.classList.add('show');
+      await sleep(380);
+      for (var j = cur + 1; j <= to; j++){
+        menuItems.forEach(function(m, x){ m.classList.toggle('hl', x === j); });
+        await sleep(170);
+      }
+      await sleep(240);
+      menu.classList.remove('show');
+      b.classList.remove('click');
+      setType(i, type);
+      setBadge(i, label, true);
+      await sleep(260);
+    }
+    // ⌘F 之后在列表里顺手改名称与规格（废弃片段跳过）
+    async function refine(i){
+      var seg = PLAN[i];
+      if (seg.k !== 'f') return;
+      await sleep(520);
+      if (seg.name) await rename(i, seg.name);
+      if (seg.type !== DEFAULT_TYPE) await pickType(i, seg.type);
+    }
+
+    function reset(){
+      root.classList.remove('ready');
+      menu.classList.remove('show');
+      marks.forEach(function(m){ m.classList.remove('on'); });
+      regions.forEach(function(r){ r.classList.remove('keep', 'drop', 'viewing'); delete r.dataset.type; });
+      rows.forEach(function(r, i){
+        r.classList.remove('on', 'keep', 'drop', 'skip', 'exported', 'viewing');
+        delete r.dataset.type;
+        r.querySelector('.op-prog').style.width = '0';
+        var n = r.querySelector('.op-name');
+        n.textContent = '片段-' + (i + 1);
+        n.classList.remove('editing', 'dbl', 'default');
+        badge(i).classList.remove('click');
+        setBadge(i, '未标记');
+        // 未切分前片段终点就是视频结尾
+        setRange(i, TOTAL);
+      });
+      log.querySelectorAll('.op-chip').forEach(function(c){ c.remove(); });
+      toast.classList.remove('show');
+      status.textContent = '待标记';
+      exportsEl.textContent = '0';
+      rows[0].classList.add('on');
+      setTime(0);
+    }
+
+    async function runExport(){
+      root.classList.add('ready');
+      cap.textContent = '看完一遍，参数都已定好：点一次导出。';
+      await sleep(700);
+      btn.classList.add('press');
+      chip('导出全部', 'e');
+      exportsEl.textContent = '1';
+      setTimeout(function(){ btn.classList.remove('press'); }, 300);
+      rows.forEach(function(r, i){
+        if (r.classList.contains('drop')){ r.classList.add('skip'); setBadge(i, '跳过'); }
+      });
+      cap.textContent = '保留的片段按各自参数依次导出，废弃的直接跳过。';
+      for (var i = 0; i < rows.length; i++){
+        if (!rows[i].classList.contains('keep')) continue;
+        setBadge(i, '导出中');
+        var prog = rows[i].querySelector('.op-prog');
+        var start = performance.now();
+        await new Promise(function(done, fail){
+          (function tick(now){
+            if (!alive()){ fail(ABORT); return; }
+            var p = Math.max(0, Math.min(1, (now - start) / 750));
+            prog.style.width = (p * 100) + '%';
+            if (p < 1) requestAnimationFrame(tick); else done();
+          })(start);
+        });
+        rows[i].classList.add('exported');
+        setBadge(i, '✓ 已导出', true);
+      }
+      status.textContent = count('exported') + ' 个文件 · 已导出';
+    }
+
+    async function loop(){
+      while (alive()){
+        reset();
+        cap.textContent = '播放头只往前走：看到哪段结尾，就在哪里定下它的去向。';
+        await sleep(700);
+        for (var i = 0; i < PLAN.length; i++){
+          var k = PLAN[i].k;
+          var last = i === PLAN.length - 1;
+          cap.textContent = '播放审看 片段-' + (i + 1) + '…';
+          if (last){
+            await playTo(LAST_AT);
+            await sleep(200);
+            press(k); mark(i, k);
+            cap.textContent = '最后一段不用切：播放中按 ⌘F，标记的就是正在看的这段。';
+            await sleep(600);
+            await refine(i);
+            await playTo(TOTAL);
+            break;
+          }
+          await playTo(BOUNDS[i + 1]);
+          await sleep(260);
+          press('x');
+          marks[i].classList.add('on');
+          setRange(i, BOUNDS[i + 1]);
+          rows[i + 1].classList.add('on');
+          cap.textContent = 'X：在 ' + short(BOUNDS[i + 1]) + ' 切分。';
+          await sleep(480);
+          press(k); mark(i, k);
+          cap.textContent = k === 'f'
+            ? '⌘F：刚看完的这段，按默认标为' + TYPE_NAME[DEFAULT_TYPE] + '（源片复制）。'
+            : '⌘D：刚看完的这段，直接废弃。';
+          await refine(i);
+          await sleep(k === 'f' ? 300 : 1000);
+        }
+        rows.forEach(function(r){ r.classList.remove('viewing'); });
+        await sleep(500);
+        await runExport();
+        cap.textContent = '播放 1 遍、回看 0 次、导出 1 次：选片、剪辑、转码参数一次搞定。';
+        await sleep(3800);
+      }
+    }
+
+    if (reduce){
+      marks.forEach(function(m){ m.classList.add('on'); });
+      PLAN.forEach(function(seg, i){
+        var keep = seg.k === 'f';
+        rows[i].classList.add('on', keep ? 'keep' : 'drop');
+        regions[i].classList.add(keep ? 'keep' : 'drop');
+        if (keep) setType(i, seg.type);
+        if (seg.name) rows[i].querySelector('.op-name').textContent = seg.name;
+        setBadge(i, keep ? TYPE_BADGE[seg.type] : DROP_BADGE);
+      });
+      root.classList.add('ready');
+      status.textContent = count('keep') + ' 段待导出 · ' + count('drop') + ' 段废弃';
+      setTime(TOTAL);
+      return;
+    }
+
+    loopInView(root, function(aliveFn){
+      alive = aliveFn;
+      reset();
+      return loop();
+    }, {threshold:.3});
+  })();
+
+  // hero timeline animation
+  (function(){
+    var reel = document.getElementById('reel');
+    if (!reel) return;
+    var tcEl = document.getElementById('timecode');
+    var capEl = document.getElementById('reelCap');
+    var playhead = document.getElementById('reelPlayhead');
+    var marks = Array.prototype.slice.call(reel.querySelectorAll('.x-mark'));
+    var segs = Array.prototype.slice.call(reel.querySelectorAll('.seg-item'));
+    var saveEl = document.getElementById('saveNum');
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var nameGen = 0;
+    var nameTimers = [];
+
+    // 时间线时长与打点间隔（12% 起，每 18% 一段）
+    var CUT_MS = 4800;
+    var CUT_FIRST = 576;
+    var CUT_STEP = 864;
+    // 最后一段入场后，名称输入（600ms 延迟 + 90ms/字）与徽标翻转（550ms 延迟 + 500ms）的收尾时长，另留 100ms 停顿
+    var SEG_SETTLE_MS = 1150;
+
+    function resetNames(){
+      nameGen++;
+      nameTimers.forEach(function(t){ clearTimeout(t); });
+      nameTimers = [];
+      segs.forEach(function(seg){
+        var n = seg.querySelector('.seg-name');
+        if (!n) return;
+        n.textContent = n.dataset.default;
+        n.classList.remove('typing', 'done', 'default');
+      });
+    }
+
+    function startTyping(seg){
+      var n = seg.querySelector('.seg-name');
+      if (!n) return;
+      var target = n.dataset.name || '';
+      var my = nameGen;
+      n.textContent = n.dataset.default;
+      n.classList.remove('done', 'default');
+      n.classList.add('typing');
+      var t = setTimeout(function(){
+        if (my !== nameGen) return;
+        if (!target){
+          n.classList.remove('typing');
+          n.classList.add('default');
+          return;
+        }
+        n.textContent = '';
+        var i = 0;
+        (function type(){
+          if (my !== nameGen) return;
+          if (i < target.length){
+            n.textContent += target.charAt(i);
+            i++;
+            nameTimers.push(setTimeout(type, 90));
+          } else {
+            n.classList.remove('typing');
+            n.classList.add('done');
+          }
+        })();
+      }, 600);
+      nameTimers.push(t);
+    }
+
+    if (reduce){
+      marks.forEach(function(m){ m.classList.add('on'); });
+      segs.forEach(function(s){ s.classList.add('on'); });
+      segs.forEach(function(seg){
+        var n = seg.querySelector('.seg-name');
+        if (!n) return;
+        n.textContent = n.dataset.name || n.dataset.default;
+        if (!n.dataset.name) n.classList.add('default');
+      });
+      tcEl.textContent = '00:20:00.00';
+      return;
+    }
+
+    var gen = 0;
+    function sleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+    function pad(n){ return String(n).padStart(2, '0'); }
+    function animateSave(target, duration, my){
+      if (!saveEl) return;
+      var start = performance.now();
+      function step(now){
+        if (my !== gen) return;
+        var p = Math.min(1, (now - start) / duration);
+        saveEl.textContent = (target * p).toFixed(1);
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    async function loop(){
+      var my = ++gen;
+      while (my === gen){
+        reel.classList.remove('packing','scan','out','done','flash');
+        marks.forEach(function(m){ m.classList.remove('on'); });
+        segs.forEach(function(s){ s.classList.remove('on'); });
+        resetNames();
+        if (saveEl) saveEl.textContent = '0.0';
+        playhead.style.transition = 'none';
+        playhead.style.left = '0%';
+        void playhead.offsetWidth;
+        tcEl.textContent = '00:00:00.00';
+        capEl.textContent = '按 X 切分，时间线自动切段。';
+        await sleep(420);
+        if (my !== gen) return;
+
+        playhead.style.transition = 'left ' + CUT_MS + 'ms linear';
+        playhead.style.left = '100%';
+
+        var start = performance.now();
+        var rafId = 0;
+        function tick(now){
+          if (my !== gen) return;
+          var p = Math.max(0, Math.min(1, (now - start) / CUT_MS));
+          var sec = Math.floor(p * 1200);
+          tcEl.textContent = '00:' + pad(Math.floor(sec / 60)) + ':' + pad(sec % 60) + '.00';
+          if (p < 1) rafId = requestAnimationFrame(tick);
+        }
+        rafId = requestAnimationFrame(tick);
+
+        for (var i = 0; i < 5; i++){
+          await sleep(i === 0 ? CUT_FIRST : CUT_STEP);
+          if (my !== gen){ cancelAnimationFrame(rafId); return; }
+          marks[i].classList.add('on');
+          segs[i].classList.add('on');
+          startTyping(segs[i]);
+        }
+
+        // 等最后一段的入场、徽标翻转与名称输入都收尾，再进入结算
+        await sleep(SEG_SETTLE_MS);
+        if (my !== gen) return;
+        capEl.textContent = '5 个片段，其中 1 段未导出。';
+        reel.classList.add('flash');
+        await sleep(1000);
+        reel.classList.remove('flash');
+        if (my !== gen) return;
+        await sleep(120);
+        if (my !== gen) return;
+
+        reel.classList.add('packing');
+        capEl.textContent = '原片进入结算：按价值分流。';
+        tcEl.textContent = 'SPLIT';
+        await sleep(600);
+        reel.classList.add('out');
+        capEl.textContent = '输出 4 种版本，废弃片段未导出。';
+        animateSave(12.2, 900, my);
+        await sleep(1300);
+        reel.classList.add('done');
+        capEl.textContent = '结算完成：保留 6.2 GB，未导出 12.2 GB。';
+        await sleep(3200);
+        if (my !== gen) return;
+        reel.classList.remove('done');
+        await sleep(500);
+        if (my !== gen) return;
+        reel.classList.remove('packing','out');
+        await sleep(600);
+      }
+    }
+
+    loopInView(reel, function(){ return loop(); }, {
+      threshold:.25,
+      stop: function(){ gen++; }
+    });
+  })();
+</script>
+</body>
+</html>
