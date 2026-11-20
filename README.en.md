@@ -1,8 +1,8 @@
-# VShunt
+# VShunt — A storage lifesaver, and not only for independent creators
 
 [简体中文](README.md) | **English**
 
-> Sort one shoot's footage by value — lossless master, 4K / 1080, audio only, or discard — export it all in one batch, then delete the originals with confidence.
+> VShunt · a footage router — you don't have to keep it all, and you don't have to delete it all.
 
 Native macOS lossless video cutting. No timeline juggling, no repeated export passes: review, cut, set transcode parameters and batch-export in one go. Built with Swift, SwiftUI and AVFoundation, with no embedded browser engine. ffmpeg ships inside the app, so it works out of the box.
 
@@ -58,7 +58,7 @@ VShunt collapses that into one pass: watch, cut and route along a single timelin
 
 ## Platform
 
-macOS only for now: Swift + SwiftUI + AVFoundation, with playback, timeline, waveform and shortcuts running directly on system frameworks. A Windows version is planned.
+macOS is available today: Swift + SwiftUI + AVFoundation, with playback, timeline, waveform and shortcuts running directly on system frameworks. The Windows version is a separate Qt 6 + libmpv implementation, currently in development.
 
 ## Open source
 
