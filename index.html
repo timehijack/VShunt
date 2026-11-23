@@ -4,17 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>VShunt 分流 — 视频无损剪辑与素材分流，批量剪辑导出与压缩，节省存储空间</title>
-<meta name="description" content="VShunt 是 macOS 原生视频无损剪辑与素材分流工具：一条时间线完成选片、切分，片段可按原片无损复制（不重新编码）、压缩到 4K/1080p 或仅提取音频，一次批量导出后即可放心删除原片，节省硬盘空间。支持字幕识别、时间线波形、自定义转码参数与导出模板，内置 ffmpeg，下载即用。">
-<meta name="keywords" content="无损剪辑,无损剪切,视频无损剪辑,不重新编码,视频素材分流,批量剪辑,批量导出,视频压缩,提取音频,删除原片,节省硬盘空间,macOS 视频工具,ffmpeg 图形界面,字幕识别">
+<meta name="description" content="VShunt 是原生视频无损剪辑与素材分流工具：一条时间线完成选片、切分，片段可按原片无损复制（不重新编码）、压缩到 4K/1080p 或仅提取音频，一次批量导出后即可放心删除原片，节省硬盘空间。支持字幕识别、时间线波形、自定义转码参数与导出模板，下载即用。">
+<meta name="keywords" content="无损剪辑,无损剪切,视频无损剪辑,不重新编码,视频素材分流,批量剪辑,批量导出,视频压缩,提取音频,删除原片,节省硬盘空间,视频剪辑工具,ffmpeg 图形界面,字幕识别">
 <meta name="theme-color" content="#0c0c0d">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="VShunt 分流">
 <meta property="og:title" content="VShunt 分流 — 视频无损剪辑与素材分流，按需压缩、批量导出省存储">
-<meta property="og:description" content="macOS 原生无损剪辑工具：一条时间线完成选片、切分、转码与批量导出，原片直接复制不重新编码，原片即可放心删除，只为好片留空间。">
+<meta property="og:description" content="原生无损剪辑工具：一条时间线完成选片、切分、转码与批量导出，原片直接复制不重新编码，原片即可放心删除，只为好片留空间。">
 <meta property="og:image" content="apple-touch-icon.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="VShunt 分流 — 视频无损剪辑与素材分流，按需压缩、批量导出省存储">
-<meta name="twitter:description" content="macOS 原生无损剪辑工具：一条时间线完成选片、切分、转码与批量导出，原片直接复制不重新编码，原片即可放心删除，只为好片留空间。">
+<meta name="twitter:description" content="原生无损剪辑工具：一条时间线完成选片、切分、转码与批量导出，原片直接复制不重新编码，原片即可放心删除，只为好片留空间。">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script>document.documentElement.className += ' js';</script>
@@ -551,14 +551,17 @@
   .split{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line-soft);border:1px solid var(--line-soft)}
   .pane{background:var(--ink);padding:44px 38px}
   .pane.local{background:linear-gradient(160deg,#14150f,#0e0f0b)}
+  .pane.alt{background:linear-gradient(160deg,#0f1418,#0b0e11)}
   .pane .kicker{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--bone-faint);margin-bottom:22px}
   .pane.local .kicker{color:var(--mint)}
+  .pane.alt .kicker{color:#8fb8e8}
   .pane h3{font-family:var(--serif);font-size:28px;margin:0 0 14px;font-weight:600}
   .pane p{color:var(--bone-dim);font-size:14px;margin:0 0 22px}
   .pane ul{margin:0;padding:0;list-style:none}
   .pane li{padding:11px 0;border-top:1px solid var(--line-soft);font-size:13.5px;color:var(--bone-dim);display:flex;gap:10px}
   .pane li::before{content:"—";color:var(--vermilion)}
   .pane.local li::before{color:var(--mint)}
+  .pane.alt li::before{color:#8fb8e8}
   @media(max-width:760px){.split{grid-template-columns:1fr}}
 
   /* install */
@@ -583,20 +586,38 @@
   summary::after{content:"+";font-family:var(--mono);color:var(--vermilion);font-size:18px;line-height:1}
   details[open] summary::after{content:"−"}
   details p{margin:14px 0 0;color:var(--bone-dim);font-size:14px;max-width:76ch}
-  details code{font-family:var(--mono);font-size:.9em;color:var(--bone);background:var(--ink-3);border:1px solid var(--line-soft);padding:1px 5px;word-break:break-all}
+  details code,.note code{font-family:var(--mono);font-size:.9em;color:var(--bone);background:var(--ink-3);border:1px solid var(--line-soft);padding:1px 5px;word-break:break-all}
 
-  /* download band */
-  .dl-band{background:var(--vermilion);color:#160a06;padding:86px 0;border-bottom:0;position:relative;overflow:hidden}
-  .dl-band::after{
-    content:"";position:absolute;inset:0;pointer-events:none;opacity:.12;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23m)'/%3E%3C/svg%3E");
+  /* download hub */
+  .dl-hub{margin-top:56px;border:1px solid var(--line);background:linear-gradient(180deg,#121214,#0d0d0f);padding:44px 40px 34px;position:relative;overflow:hidden;scroll-margin-top:84px}
+  .dl-hub::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(90% 70% at 100% 0%,rgba(255,90,43,.1),transparent 60%)}
+  .dl-hub-head{display:flex;justify-content:space-between;align-items:flex-end;gap:36px;margin-bottom:34px;position:relative;z-index:1;flex-wrap:wrap}
+  .dl-hub-head h3{font-family:var(--serif);font-size:clamp(26px,3.4vw,38px);line-height:1.15;margin:12px 0 0;font-weight:600}
+  .dl-hub-head > p{max-width:480px;margin:0;color:var(--bone-dim);font-size:14px}
+  .dl-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;position:relative;z-index:1}
+  .dl-card{border:1px solid var(--line);background:var(--ink);padding:28px 26px;display:flex;flex-direction:column;gap:16px;transition:border-color .25s,background .25s}
+  .dl-card:hover{border-color:#3a3a3f;background:#101012}
+  .dl-card.recommend{border-color:rgba(255,90,43,.42);background:linear-gradient(180deg,rgba(255,90,43,.06),transparent 46%),var(--ink)}
+  .dl-card-tag{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--bone-faint);text-transform:uppercase}
+  .dl-card-tag::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+  .dl-card.recommend .dl-card-tag{color:var(--vermilion)}
+  .dl-card h4{font-family:var(--serif);font-size:23px;margin:0;font-weight:600}
+  .dl-card > p{margin:0;color:var(--bone-dim);font-size:13.5px;line-height:1.65}
+  .dl-links{display:flex;flex-direction:column;gap:8px;margin-top:auto}
+  .dl-link{display:flex;align-items:center;gap:12px;padding:13px 15px;border:1px solid var(--line);background:var(--ink-2);transition:border-color .2s,background .2s,transform .2s}
+  .dl-link:hover{border-color:var(--bone-faint);background:var(--ink-3);transform:translateY(-1px)}
+  .dl-link > svg{flex:none;opacity:.72}
+  .dl-os{display:flex;flex-direction:column;line-height:1.35;min-width:0}
+  .dl-os b{font-weight:500;font-size:14px}
+  .dl-os span{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--bone-faint)}
+  .dl-go{margin-left:auto;flex:none;font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--bone-faint);display:inline-flex;align-items:center;gap:6px}
+  .dl-card.recommend .dl-link:hover .dl-go{color:var(--vermilion)}
+  .dl-meta{margin-top:26px;padding-top:18px;border-top:1px solid var(--line-soft);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;position:relative;z-index:1;color:var(--bone-faint);font-size:11.5px;font-family:var(--mono);letter-spacing:.04em}
+  @media(max-width:900px){
+    .dl-hub{padding:32px 24px 26px}
+    .dl-hub-head{gap:18px;margin-bottom:26px}
+    .dl-grid{grid-template-columns:1fr}
   }
-  .dl-inner{display:flex;justify-content:space-between;align-items:flex-end;gap:40px;position:relative;z-index:1;flex-wrap:wrap}
-  .dl-band h2{font-family:var(--serif);font-size:clamp(36px,5.6vw,72px);line-height:1.04;margin:0;color:#160a06;letter-spacing:-.02em}
-  .dl-band .mono{color:rgba(22,10,6,.62)}
-  .dl-band .btn{background:#160a06;color:var(--bone);border-color:#160a06}
-  .dl-band .btn:hover{background:#2a130c}
-  .dl-band .small{margin-top:16px;font-size:12px;color:rgba(22,10,6,.68);font-family:var(--mono);letter-spacing:.04em}
 
   /* footer */
   footer{padding:64px 0 44px;background:#09090a}
@@ -617,12 +638,6 @@
     .playhead,.marquee-inner{animation:none}
     html{scroll-behavior:auto}
   }
-  .toast{
-    position:fixed;left:50%;bottom:32px;transform:translateX(-50%);
-    background:var(--bone);color:var(--ink);padding:11px 18px;font-size:13px;
-    display:none;z-index:1002;
-  }
-  .toast.show{display:block}
 </style>
 </head>
 <body>
@@ -640,7 +655,7 @@
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M14 4h6v6M20 4l-8 8M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
     </a>
   </div>
-  <a class="nav-cta" href="#download" data-download>下载 macOS 版</a>
+  <a class="nav-cta" href="#download">下载 VShunt</a>
   <button type="button" class="nav-toggle" id="navToggle" aria-label="菜单" aria-expanded="false" aria-controls="navLinks"><span></span><span></span></button>
 </nav>
 
@@ -650,15 +665,15 @@
       <div>
         <div class="eyebrow mono reveal"><span class="dot"></span>VShunt · 素材分流器 / 素材不用全留，也不用全删</div>
         <h1 class="reveal">不只是自媒体人<br>的<em>存储救星</em></h1>
-        <p class="lede reveal">VShunt 按需分配每一段素材的导出规格：用于调色的 Log 原片无损留作母版，高码率相机素材可原分辨率压低码率，日常回看、发布分享的转为 1080p，也可仅保留原始音频，多余的片段则直接废弃。不用来回切换时间线反复折腾导出，只需一遍就能完成选片、剪辑、规格设定，然后一键批量导出。</p>
+        <p class="lede reveal">VShunt 按需分配每一段素材的导出规格：用于调色的 Log 原片无损留作母版，高码率相机素材可原分辨率压低码率，日常回看、发布分享的转为 1080p，也可仅保留原始音频，多余的片段则直接废弃。不用为每段另开时间线，也不用逐段导出——边看边切，一遍走完就能批量导出。</p>
         <div class="actions reveal">
-          <a class="btn" href="#download" data-download>下载 VShunt
+          <a class="btn" href="#download">下载 VShunt
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v13m0 0l-5-5m5 5l5-5M4 21h16"/></svg>
           </a>
           <a class="btn ghost" href="#features">看看能做什么</a>
         </div>
         <div class="meta reveal">
-          <span>macOS 26.0+</span><span>·</span><span>Apple Silicon</span><span>·</span><span>DMG · 约 75 MB</span>
+          <span>macOS / Windows</span><span>·</span><span>下载即用</span>
         </div>
       </div>
 
@@ -772,7 +787,7 @@
       </article>
     </div>
 
-    <p class="problem-close reveal">VShunt 把这一整套压缩成一次操作：在<b>一条时间线</b>上边看边选、边切边分流，每个片段落下时就已确定去向与规格，最后一次性导出。原片即可放心删除，只为好片留空间，不为废片留位置。</p>
+    <p class="problem-close reveal">VShunt 把这一整套压缩成一次操作：在<b>一条时间线</b>上边看边选、边切边分流，每段素材在切分时就标记保留或废弃，并指定导出规格，最后一次性导出。原片即可放心删除，只为好片留空间，不为废片留位置。</p>
   </div>
 </section>
 
@@ -788,7 +803,7 @@
     <div class="steps">
       <div class="step reveal"><div class="bar"></div><div class="big">STEP 01</div><h3>识别</h3><p>对话类素材仅凭画面难以判断价值。先识别字幕，通过文字快速了解每段内容，按关键词搜索并直接跳转。</p></div>
       <div class="step reveal"><div class="bar"></div><div class="big">STEP 02</div><h3>切分</h3><p>不用单独设入点和出点：X 键即可自动分段。配合字幕和波形，切口能精确落在一句话的停顿上。</p></div>
-      <div class="step reveal"><div class="bar"></div><div class="big">STEP 03</div><h3>分流</h3><p>点击片段或使用快捷键，为每段指定去向：源片复制、预设压缩、自定义规格、仅提取音频，或直接废弃忽略。</p></div>
+      <div class="step reveal"><div class="bar"></div><div class="big">STEP 03</div><h3>分流</h3><p>点击片段或使用快捷键，为每段指定处理方式：源片复制、预设压缩、自定义规格、仅提取音频，或直接废弃忽略。</p></div>
       <div class="step reveal"><div class="bar"></div><div class="big">STEP 04</div><h3>导出</h3><p>按照既定参数即可一次性全部导出，也支持单独导出每一段，不用每个片段挨个操作。</p></div>
     </div>
 
@@ -796,9 +811,9 @@
       <div class="op-intro">
         <div>
           <span class="mono op-kicker">HIGHLIGHT / ONE PASS</span>
-          <h3>⌘F 留，⌘D 弃，<br>看一遍就定稿。</h3>
+          <h3>⌘F 留，⌘D 弃，<br>一条时间线装下整个工作流。</h3>
         </div>
-        <p>按 X 切分后根据需要使用 ⌘F 将片段标记为"保留"，或 ⌘D 将片段标记为"废弃"；需要别的规格或名称，在片段列表里顺手改掉。只往前走，不用来回处理片段，也不用逐段导出。看完一遍，点一次导出就行。</p>
+        <p>按 X 切分后根据需要使用 ⌘F 将片段标记为"保留"，或 ⌘D 将片段标记为"废弃"；需要别的规格或名称，在片段列表里顺手改掉。每段在标记时就已指定规格，不用逐段导出。筛片即分流，只需一遍。</p>
       </div>
 
       <div class="op-head">
@@ -858,7 +873,7 @@
       </div>
 
       <div class="op-foot">
-        <div class="op-cap" id="opCap">播放头只往前走：看到哪段结尾，就在哪里定下它的去向。</div>
+        <div class="op-cap" id="opCap">边看边切，每次切分完顺手就能完成分流。</div>
         <div class="op-stats"><span>播放<b>1</b>遍</span><span>回看<b>0</b>次</span><span>导出<b class="hot" id="opExports">0</b>次</span></div>
       </div>
     </div>
@@ -871,7 +886,7 @@
       <div class="sec-no">03 / EXPORT</div>
       <div>
         <h2>导出参数，完全由你定。</h2>
-        <p>分辨率、码率、帧率等参数都能逐项修改，也可以用 6 档预设一键套用。机器支持硬件编码时，可以把编码交给 Apple Silicon 的媒体引擎（VideoToolbox），导出速度快数倍、功耗更低；</p>
+        <p>分辨率、码率、帧率等参数都能逐项修改，也可以用 6 档预设一键套用。机器支持硬件编码时，可以把编码交给硬件媒体引擎（macOS 为 VideoToolbox，Windows 为对应硬件编码器），导出速度快数倍、功耗更低；</p>
       </div>
     </div>
     <div class="export-grid reveal">
@@ -922,7 +937,7 @@
       <div class="sec-no">04 / HIGHLIGHTS</div>
       <div>
         <h2>精确，不靠放大时间线。</h2>
-        <p>拖进度条，很难刚好停在想要的位置。在 VShunt 里，每一步走多远由你决定：时间框按时、分、秒、厘秒逐段步进，画面上滚动则按档位步进。鼠标和键盘都有对应的操作。</p>
+        <p>筛片时要能快速浏览，剪辑时要能精确停顿。在 VShunt 里，每一步走多远由你决定：时间框按时、分、秒、厘秒逐段步进，画面上滚动则按档位步进；鼠标和键盘都有对应的操作。</p>
       </div>
     </div>
 
@@ -1006,7 +1021,7 @@
     <div class="perf-head reveal">
       <div class="mono" style="color:var(--vermilion);margin-bottom:18px">05 / NATIVE · NOT A WEB VIEW</div>
       <h2>不是套壳。<br>是原生播放器。</h2>
-      <p>播放、seek、波形和快捷键直接跑在 AVFoundation 与 AppKit 上，不经过浏览器内核。拖动、逐帧、缩放都是原生级的手感，标准只有一个：像 QuickTime Player 一样跟手。</p>
+      <p>macOS 版直接跑在 AVFoundation 与 AppKit 上，Windows 版基于 libmpv 渲染，两端都不经过浏览器内核。拖动、逐帧、缩放都是原生级的手感，标准只有一个：像专业播放器一样跟手。</p>
     </div>
     <div class="perf-compare reveal">
       <div class="pc bad">
@@ -1057,7 +1072,7 @@
       <article class="card reveal">
         <span class="num">F.03</span>
         <h3>字幕，两种后端</h3>
-        <p>云端识别更准，还能区分说话人；不想配置云端时可以用 Apple Speech 本地识别，也能导入现成字幕，或接入你自己的识别工具。</p>
+        <p>云端识别更准，还能区分说话人；不想配置云端时可以用系统本机识别（macOS 为 Apple Speech，Windows 为系统语音识别），也能导入现成字幕，或接入你自己的识别工具。</p>
         <div class="tags"><span class="tag">SRT / VTT / JSON</span><span class="tag">兴趣点 POI</span></div>
       </article>
       <article class="card reveal">
@@ -1099,13 +1114,13 @@
         <ul>
           <li>准确率更高，适合正式选片</li>
           <li>说话人、情绪、音量等扩展信息</li>
-          <li>凭证保存在系统钥匙串</li>
+          <li>凭证保存在本地配置文件中，不上传到服务器，不存储任何个人信息</li>
         </ul>
       </div>
       <div class="pane">
         <div class="kicker">● 本地 / 零配置</div>
-        <h3>Apple Speech</h3>
-        <p>不想配置云端时的另一个选择：使用系统语音识别，不需要账号或 API Key，音频不离开本机。首次使用会下载对应语言的系统语音资源。</p>
+        <h3>系统本机识别</h3>
+        <p>不想配置云端时的另一个选择：使用系统语音识别，不需要账号或 API Key，音频不离开本机。macOS 使用 Apple Speech，Windows 使用系统语音识别；首次使用会下载对应语言的语音资源。</p>
         <ul>
           <li>零配置，打开就能用</li>
           <li>适合隐私敏感的素材</li>
@@ -1155,7 +1170,7 @@
     <div class="sec-head reveal">
       <div class="sec-no">09 / INSTALL</div>
       <div>
-        <h2>下载，拖进去，打开。</h2>
+        <h2>下载，安装，打开。</h2>
         <p>解码与编码能力已经打包进 App，不需要 Homebrew，也不需要额外的命令行工具。</p>
       </div>
     </div>
@@ -1163,24 +1178,24 @@
       <div class="reveal">
         <div class="req">
           <dl>
-            <dt>系统</dt><dd>macOS 26.0 及以上</dd>
-            <dt>芯片</dt><dd>Apple Silicon（M1 及以上）</dd>
-            <dt>依赖</dt><dd>无需安装 · ffmpeg / ffprobe 已内置</dd>
-            <dt>安装包</dt><dd>DMG，约 75 MB</dd>
+            <dt>系统</dt><dd>macOS 26.0 及以上；Windows 10 / 11</dd>
+            <dt>芯片</dt><dd>macOS 需 Apple Silicon（M1 及以上）；Windows 为 x64</dd>
+            <dt>依赖</dt><dd>无需安装 · 开箱即用</dd>
+            <dt>安装包</dt><dd>macOS：DMG，约 75 MB；Windows：Setup 安装包</dd>
             <dt>语言</dt><dd>简体中文 / English / 日本語 / 한국어 / Русский</dd>
           </dl>
         </div>
-        <div class="note">首次打开如果提示「无法验证开发者」，先点「完成」关掉提示，再打开「系统设置 → 隐私与安全性」，在页面下方点「仍要打开」，输入密码确认即可。完成公证的版本可直接双击打开。</div>
+        <div class="note">macOS 版若提示「无法验证开发者」，到「系统设置 › 隐私与安全性」中点按「仍要打开」；若提示「已损坏，无法打开」，打开「终端.app」，粘贴并回车：<code>xattr -dr com.apple.quarantine /Applications/VShunt.app</code>。已通过 Apple 公证的版本双击即可打开。Windows 版为按用户安装，无需管理员权限。</div>
       </div>
       <div class="reveal">
         <ol class="ol">
-          <li><strong>下载 DMG</strong>点击页面上的下载按钮，保存到「下载」文件夹。</li>
-          <li><strong>拖入应用程序</strong>双击打开 DMG，把 VShunt 拖到 Applications 文件夹。</li>
+          <li><strong>下载安装包</strong>macOS 下载 DMG，Windows 下载 Setup 安装包。</li>
+          <li><strong>安装</strong>macOS 双击打开 DMG，把 VShunt 拖到 Applications；Windows 运行 Setup，按提示完成安装。</li>
           <li><strong>打开并导入视频</strong>拖入任意 mp4 / mov，按 X 切分，时间线会自动生成片段。</li>
-          <li><strong>试一次本地字幕</strong>字幕面板 → 识别后端选 Apple Speech（本地）→ 选择语言 → 开始识别。</li>
+          <li><strong>试一次本机识别</strong>字幕面板 → 识别后端选系统本机识别 → 选择语言 → 开始识别。</li>
         </ol>
         <div style="margin-top:26px">
-          <a class="btn" href="#download" data-download>下载 VShunt
+          <a class="btn" href="#download">选择下载方式
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v13m0 0l-5-5m5 5l5-5M4 21h16"/></svg>
           </a>
         </div>
@@ -1194,35 +1209,98 @@
     <div class="sec-head reveal">
       <div class="sec-no">10 / PLATFORMS</div>
       <div>
-        <h2>先把它在 macOS 上做对。</h2>
-        <p>VShunt 的体验建立在帧级 seek、波形实时渲染和系统级快捷键上。第一版选择原生实现，是为了先把这套交互打磨到可用，而不是把界面套进一个跨平台壳里。</p>
+        <h2>两个平台，<br>同一套分流逻辑。</h2>
+        <p>VShunt 的体验建立在帧级 seek、波形实时渲染和系统级快捷键上。两端都是原生实现：macOS 版走系统框架，Windows 版基于 libmpv 渲染，都不把界面套进浏览器壳里。</p>
       </div>
     </div>
     <div class="split reveal">
       <div class="pane local">
         <div class="kicker">● 现在可用</div>
         <h3>macOS</h3>
-        <p>Swift + SwiftUI + AVFoundation 原生实现，播放、时间线、波形和快捷键都直接跑在系统框架上。</p>
+        <p>Swift + SwiftUI + AVFoundation，播放、时间线、波形和快捷键都直接跑在系统框架上。</p>
         <ul>
           <li>macOS 26.0 及以上，Apple Silicon</li>
           <li>无需安装额外依赖，下载即用</li>
           <li>源片复制、预设、自定义规格与纯音频，按需分流导出</li>
         </ul>
         <div style="margin-top:26px">
-          <a class="btn" href="#download" data-download>下载 macOS 版
+          <a class="btn" href="#download">选择下载方式
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v13m0 0l-5-5m5 5l5-5M4 21h16"/></svg>
           </a>
         </div>
       </div>
-      <div class="pane" style="background:linear-gradient(160deg,#121214,#0d0d0f)">
-        <div class="kicker">○ 规划中</div>
+      <div class="pane alt">
+        <div class="kicker">● 现在可用</div>
         <h3>Windows</h3>
-        <p>会按同样的标准做原生重做，而不是简单移植界面。播放器、波形、帧级定位和批量分流都会重新实现。</p>
+        <p>同一套分流逻辑的独立原生实现：Qt 6 + C++20 + QML，播放与渲染基于 libmpv，不依赖浏览器内核。</p>
         <ul>
-          <li>原生播放与帧级 seek，不依赖浏览器内核</li>
-          <li>时间线、波形与快捷键按 Windows 习惯重做</li>
-          <li>具体时间与系统要求确定后在本页公布</li>
+          <li>Windows 10 / 11（x64）</li>
+          <li>Setup 安装包，按用户安装，无需管理员权限</li>
+          <li>源片复制、预设、自定义规格与纯音频，与 macOS 版一致</li>
         </ul>
+        <div style="margin-top:26px">
+          <a class="btn" href="#download">选择下载方式
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v13m0 0l-5-5m5 5l5-5M4 21h16"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="dl-hub reveal" id="download">
+      <div class="dl-hub-head">
+        <div>
+          <div class="mono" style="color:var(--vermilion)">DOWNLOAD / v1.0.0</div>
+          <h3>请选择下载方式</h3>
+        </div>
+        <p>优先走 GitHub：发布附件与版本更新同步，最及时。GitHub 无法访问时，再用对象存储备用线路。两者都是安装包直链，点击即开始下载，不跳转发布页。</p>
+      </div>
+      <div class="dl-grid">
+        <div class="dl-card recommend">
+          <div class="dl-card-tag">推荐 · 更新及时</div>
+          <h4>GitHub Releases</h4>
+          <p>发布附件与当前版本同步，通常优先走这条线路。</p>
+          <div class="dl-links">
+            <a class="dl-link" href="https://github.com/timehijack/VShunt/releases/download/v1.0.0/VShunt-1.0.0-b1-macos-universal.dmg">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.7 12.9c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.9-1.4-.1-2.8.9-3.5.9-.7 0-1.8-.9-3-.9-1.5 0-3 1-3.8 2.4-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.3 3 2.3 1.2 0 1.6-.8 3.1-.8 1.4 0 1.8.8 3 .8 1.3 0 2.1-1.1 2.9-2.2.9-1.3 1.3-2.5 1.3-2.6-.1 0-2.8-1.1-2.8-3.8zM14.5 5.9c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.8 1.4-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.5 2.8-1.3z"/></svg>
+              <span class="dl-os"><b>macOS</b><span>DMG · Apple Silicon</span></span>
+              <span class="dl-go">下载
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 20h14"/></svg>
+              </span>
+            </a>
+            <a class="dl-link" href="https://github.com/timehijack/VShunt/releases/download/v1.0.0/VShunt-1.0.0-b1-windows-x64.exe">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.6l7.4-1v7H3v-6zm8.4-1.1L21 3v8.6h-9.6V4.5zM3 12.6h7.4v7L3 18.4v-5.8zm8.4 0H21V21l-9.6-1.4v-7z"/></svg>
+              <span class="dl-os"><b>Windows</b><span>Setup · x64</span></span>
+              <span class="dl-go">下载
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 20h14"/></svg>
+              </span>
+            </a>
+          </div>
+        </div>
+        <div class="dl-card">
+          <div class="dl-card-tag">备用线路</div>
+          <h4>对象存储直链</h4>
+          <p>GitHub 无法访问时使用，提供的安装包与当前版本一致。</p>
+          <div class="dl-links">
+            <a class="dl-link" href="https://vshunt.oss-cn-guangzhou.aliyuncs.com/VShunt-1.0.0-b1-macos-universal.dmg">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.7 12.9c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.9-1.4-.1-2.8.9-3.5.9-.7 0-1.8-.9-3-.9-1.5 0-3 1-3.8 2.4-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.3 3 2.3 1.2 0 1.6-.8 3.1-.8 1.4 0 1.8.8 3 .8 1.3 0 2.1-1.1 2.9-2.2.9-1.3 1.3-2.5 1.3-2.6-.1 0-2.8-1.1-2.8-3.8zM14.5 5.9c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.8 1.4-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.5 2.8-1.3z"/></svg>
+              <span class="dl-os"><b>macOS</b><span>DMG · Apple Silicon</span></span>
+              <span class="dl-go">下载
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 20h14"/></svg>
+              </span>
+            </a>
+            <a class="dl-link" href="https://vshunt.oss-cn-guangzhou.aliyuncs.com/VShunt-1.0.0-b1-windows-x64.exe">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.6l7.4-1v7H3v-6zm8.4-1.1L21 3v8.6h-9.6V4.5zM3 12.6h7.4v7L3 18.4v-5.8zm8.4 0H21V21l-9.6-1.4v-7z"/></svg>
+              <span class="dl-os"><b>Windows</b><span>Setup · x64</span></span>
+              <span class="dl-go">下载
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 20h14"/></svg>
+              </span>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="dl-meta">
+        <span>版本 1.0.0 · 构建 b1</span>
+        <span>macOS 26.0+ Apple Silicon · Windows 10 / 11（x64）</span>
       </div>
     </div>
   </div>
@@ -1237,15 +1315,19 @@
     <div class="reveal">
       <details>
         <summary>和 Electron / WebView 套壳工具有什么区别？</summary>
-        <p>VShunt 的播放、seek、波形和快捷键直接调用 AVFoundation / AppKit，不经过浏览器内核。用起来的区别是：拖动时间线画面随手走，逐帧和滚轮微调即按即到、不回弹。早期的 WebView 版本在这些地方达不到要求，所以改用 Swift 原生重写。</p>
+        <p>VShunt 两端都直接调用系统原生能力：macOS 版走 AVFoundation / AppKit，Windows 版基于 libmpv 渲染，都不经过浏览器内核。用起来的区别是：拖动时间线画面随手走，逐帧和滚轮微调即按即到、不回弹。早期的 WebView 版本在这些地方达不到要求，所以改用原生实现重写。</p>
       </details>
       <details>
-        <summary>会有 Windows 版吗？</summary>
-        <p>会，但不会简单移植。Windows 版需要重做播放器、波形、帧级 seek 与快捷键，具体时间与系统要求确定后会在本页公布。</p>
+        <summary>Windows 版和 macOS 版有什么区别？</summary>
+        <p>Windows 版是独立原生实现，不是简单移植：播放器基于 libmpv，波形、帧级 seek、快捷键与批量分流都按 Windows 习惯重做。首版支持 Windows 10 / 11（x64）；分流逻辑、导出规格与工程数据与 macOS 版一致。</p>
       </details>
       <details>
         <summary>会帮我删掉原片吗？</summary>
         <p>不会。VShunt 只做标记和导出，删除权始终在你手里。你可以先按分流结果把需要的片段全部导出，确认无误后再自己清理原片。</p>
+      </details>
+      <details>
+        <summary>工程文件和导出结果保存在哪里？</summary>
+        <p>都放在源视频旁边，方便一起搬移和备份。工程数据在源视频同目录的 <code>vshunt-data/&lt;视频名&gt;/</code>：<code>project.json</code> 保存切割点、片段命名与导出标记，同目录还有字幕和波形缓存；导出结果在源视频同目录的 <code>&lt;视频名&gt;/</code> 文件夹，按片段名称与时间戳命名，不会混进源素材。把视频和这两个目录一起复制，就能在另一台机器上接着剪。导出位置目前固定跟随源视频，后续会提供自定义导出目录。</p>
       </details>
       <details>
         <summary>必须配置 API Key 才能用吗？</summary>
@@ -1260,27 +1342,14 @@
         <p>输入推荐 mp4 / mov，常见格式基本都能打开。不需要压缩的片段直接复制原片；需要压缩时按源视频的编码重新编码（H.264 素材输出 H.264，HEVC 素材输出 HEVC），容器可选 MP4 或 MOV，分辨率、帧率、码率都能自定义，也内置了原分辨率高画质 / 小体积、4K、1080p、720p、480p 六档场景预设，按源分辨率限制不放大；4K 交付在硬件可用时自动走硬编，否则回退软编。纯音频直接复制原音轨，格式跟随源文件，常见为 AAC。</p>
       </details>
       <details>
-        <summary>为什么要求 macOS 26.0？</summary>
-        <p>本地字幕识别依赖系统的 SpeechAnalyzer 语音框架，它从 macOS 26.0 才开始提供，因此最低系统版本为 macOS 26.0。</p>
+        <summary>macOS 版为什么要求 macOS 26.0？</summary>
+        <p>macOS 版本地字幕识别依赖系统的 SpeechAnalyzer 语音框架，它从 macOS 26.0 才开始提供，因此最低系统版本为 macOS 26.0。Windows 版使用系统自带语音识别，不受此限制。</p>
       </details>
       <details>
         <summary>如何卸载？</summary>
-        <p>把 Applications 中的 VShunt 移到废纸篓即可。工程数据、模板与配置保存在 <code>~/Library/Application Support/VShunt</code>，如需彻底清理可一并删除。</p>
+        <p>macOS 把 Applications 中的 VShunt 移到废纸篓；Windows 在「设置 → 应用」中卸载。工程数据跟随视频保存在同目录的 <code>vshunt-data/</code>，模板与配置分别保存在 <code>~/Library/Application Support/VShunt</code> 与 <code>%APPDATA%\VShunt</code>，如需彻底清理可一并删除。</p>
       </details>
     </div>
-  </div>
-</section>
-
-<section id="download" class="dl-band">
-  <div class="wrap dl-inner">
-    <div>
-      <div class="mono" style="margin-bottom:22px">GET VSHUNT / v1.0.0</div>
-      <h2>下一次粗剪，<br>从这里开始。</h2>
-      <div class="small">macOS 26.0+ · Apple Silicon · DMG 约 75 MB</div>
-    </div>
-    <a class="btn" href="#" data-download>下载 VShunt
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v13m0 0l-5-5m5 5l5-5M4 21h16"/></svg>
-    </a>
   </div>
 </section>
 
@@ -1295,19 +1364,18 @@
         <a href="#features">功能</a>
         <a href="#workflow">工作流</a>
         <a href="#install">安装说明</a>
-        <a href="#download" data-download>下载</a>
+        <a href="#download">下载</a>
       </div>
       <div class="foot-col">
         <h4>DETAILS</h4>
         <p>版本 1.0.0</p>
-        <p>macOS 26.0+</p>
-        <p>Apple Silicon</p>
-        <p>Windows：规划中</p>
+        <p>macOS 26.0+ · Apple Silicon</p>
+        <p>Windows 10 / 11（x64）</p>
       </div>
       <div class="foot-col">
         <h4>LINKS</h4>
         <a href="https://github.com/timehijack/VShunt" target="_blank" rel="noopener">GitHub 主页</a>
-        <a href="https://github.com/timehijack/VShunt/releases" target="_blank" rel="noopener">发布与下载</a>
+        <a href="https://github.com/timehijack/VShunt/releases/tag/v1.0.0" target="_blank" rel="noopener">版本发布记录</a>
         <a href="https://github.com/timehijack/VShunt/issues" target="_blank" rel="noopener">问题反馈</a>
       </div>
     </div>
@@ -1318,34 +1386,9 @@
   </div>
 </footer>
 
-<div class="toast" id="toast">下载地址尚未配置</div>
-
 <script>
-  var DOWNLOAD_URL = "https://github.com/timehijack/VShunt/releases/latest";
-
   var nav = document.getElementById('nav');
   var bar = document.getElementById('progress');
-  var toast = document.getElementById('toast');
-  var toastTimer;
-
-  function showToast(msg){
-    toast.textContent = msg;
-    toast.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(function(){ toast.classList.remove('show'); }, 2400);
-  }
-
-  document.querySelectorAll('[data-download]').forEach(function(el){
-    el.setAttribute('href', DOWNLOAD_URL);
-    el.addEventListener('click', function(e){
-      if (!DOWNLOAD_URL){
-        e.preventDefault();
-        showToast('下载地址尚未配置');
-        return;
-      }
-      el.setAttribute('href', DOWNLOAD_URL);
-    });
-  });
 
   var navToggle = document.getElementById('navToggle');
   function setNavOpen(open){
@@ -2123,7 +2166,7 @@
     async function loop(){
       while (alive()){
         reset();
-        cap.textContent = '播放头只往前走：看到哪段结尾，就在哪里定下它的去向。';
+        cap.textContent = '边看边切，每次切分完顺手就能完成分流。';
         await sleep(700);
         for (var i = 0; i < PLAN.length; i++){
           var k = PLAN[i].k;
