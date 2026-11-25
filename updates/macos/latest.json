@@ -13,7 +13,7 @@
       "kind" : "github",
       "sha256" : "c3bfb9441a821e1e3e623c96c19fc554bce2fc2d166ec6a867f4e8eae4043018",
       "size" : 73223873,
-      "url" : "https://github.com/timehijack/VShunt/releases/download/macos-v1.0.2/VShunt-1.0.2-b3-macos-universal.dmg"
+      "url" : "https://github.com/timehijack/VShunt/releases/download/v1.0.2/VShunt-1.0.2-b3-macos-universal.dmg"
     }
   ],
   "notes" : {
@@ -69,7 +69,7 @@
     ]
   },
   "platform" : "macos",
-  "publishedAt" : "2026-11-25T01:09:57Z",
+  "publishedAt" : "2026-11-25T05:20:14Z",
   "schema" : 3,
   "version" : "1.0.2"
 }
