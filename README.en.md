@@ -4,7 +4,7 @@
 
 > VShunt · a footage router — you don't have to keep it all, and you don't have to delete it all.
 
-VShunt is a native rough-cut tool for creators with piles of 4K / Log footage and a nearly full drive, available for macOS and Windows: watch and cut as you go, give each segment its own export spec, and skip per-segment timelines and per-segment exports — one timeline carries the whole workflow. Both builds are native, with no embedded browser engine, and work out of the box.
+VShunt is a native lossless cutting tool for creators with piles of 4K / Log footage and a nearly full drive, available for macOS and Windows: watch and cut as you go, give each segment its own export spec, and skip per-segment timelines and per-segment exports — one timeline carries the whole workflow. Both builds are native, with no embedded browser engine, and work out of the box.
 
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-black)](https://github.com/timehijack/VShunt/releases)
 [![Built with](https://img.shields.io/badge/built%20with-Swift%20%7C%20C%2B%2B-orange)](https://github.com/timehijack/VShunt)
@@ -48,6 +48,7 @@ VShunt collapses that into one pass: watch, cut and route along a single timelin
 - **Lossless cutting** — masters use stream copy, with no re-encode: identical quality, extremely fast export.
 - **Per-segment specs** — set container (MP4 / MOV), resolution, frame rate, rate control (CRF / constant bitrate), encoding speed, hardware acceleration and metadata retention per segment. Audio is copied from the source. Codec follows the source: H.264 in, H.264 out; HEVC in, HEVC out.
 - **Presets and templates** — six built-in presets (source-resolution high quality / smaller file, 4K, 1080p, 720p, 480p); save tuned settings as reusable templates and import or export them as JSON.
+- **Groups and archiving** — tag segments with an A–Z letter (A for client delivery, B for archive, and so on); at export, segments in the same group land in the same folder, and each spec gets its own subfolder. You see the final folder tree and file counts before exporting, so there is no manual sorting afterwards. Letter colors and folder names are yours to rename.
 - **Arbitrary ffmpeg arguments** — append custom arguments in advanced options, with a command preview before export.
 - **Timeline and waveform** — Canvas-drawn timeline, `Cmd + scroll` to zoom, playhead follow, with subtitle speech regions drawn onto the waveform.
 - **Frame-accurate stepping** — the time field steps by hour, minute, second and centisecond: scroll over the segment under the cursor, or select it and use `↑` `↓` with `Tab` to switch fields, carrying and borrowing across units. Scrolling on the video steps by one of five configurable amounts.
@@ -74,6 +75,10 @@ Precision does not come from zooming the timeline. Screening needs fast browsing
 ## Export
 
 Every segment carries its own export parameters, and every field is customizable.
+
+**Confirm where files go** — batch export, single-segment video, single-segment audio and full-length audio extraction all ask where to save and how to split, right before they start. Pick another location or restore the default in one click; the location you pick stays for this run, so you do not choose it again every time.
+
+**Groups and specs become folders** — with Group by segment on, segments in A and B go into folders A and B; with Archive by spec on, masters, audio and each resolution get their own subfolder named after the format or resolution (`2160-3`, `1080`), and renaming one never scrambles the others. The preview shows every folder and how many files it will hold, and a folder you cannot write to is flagged before export. Finished files show their group letter, and Open Folder takes you straight to the root.
 
 **Readable progress, estimable time remaining** — the export window shows the actual ffmpeg command, frame rate, bitrate, elapsed time and remaining time, so even long jobs tell you how much longer to wait.
 
@@ -119,7 +124,9 @@ Both builds are native, with playback and rendering bypassing any browser engine
 
 ## Open source
 
-VShunt is currently distributed as a binary; the app source and development documentation are not public yet. The public repository [timehijack/VShunt](https://github.com/timehijack/VShunt) hosts the installers, the website content and the third-party sources required for GPL compliance. Source for both platforms is being prepared and will be published there after code review and privacy review are complete.
+VShunt is currently distributed as a binary. The public repository [timehijack/VShunt](https://github.com/timehijack/VShunt) hosts the macOS / Windows installers, the website content and the third-party sources required for GPL compliance.
+
+Source for both platforms is being prepared and will be published in the same repository after code review and privacy review.
 
 ## Download
 
@@ -164,6 +171,8 @@ The app bundles ffmpeg 8.0.1 and the components below, built statically with a G
 | libvpx | 1.15.0 | BSD-3-Clause |
 | SVT-AV1 | 2.3.0 | BSD-3-Clause |
 
-Component versions, build configurations and license texts ship with each release. The complete corresponding source and build scripts are available in the [GitHub Release (ffmpeg-8.0.1)](https://github.com/timehijack/VShunt/releases/tag/ffmpeg-8.0.1); the bundled `NOTICE.txt` contains the GPLv2 §3(b) written offer (contact: `timehijack@qq.com`).
+Component versions, build configurations and license texts ship with each release. The complete corresponding source and build scripts are published in the [GitHub Release (ffmpeg-8.0.1)](https://github.com/timehijack/VShunt/releases/tag/ffmpeg-8.0.1).
 
-This project's own code is released under the **GNU General Public License v3.0**; see [LICENSE](LICENSE) for the full terms.
+## License
+
+[GPLv3](LICENSE)
