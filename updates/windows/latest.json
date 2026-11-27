@@ -1,80 +1,90 @@
 {
-  "build": 3,
+  "build": 4,
   "channel": "stable",
   "critical": false,
   "downloads": [
     {
       "kind": "oss",
-      "sha256": "890fa6d89b1c4d18d47fc8eea4c062f281174cfdecb6919e60c5affd95da24bd",
-      "size": 97135008,
-      "url": "https://vshunt.oss-cn-guangzhou.aliyuncs.com/VShunt-1.0.2-b3-windows-x64.exe"
+      "sha256": "5215f946d7c6593d152f1b14847e9a686bf917fb66b946a2f7ed733c37e82228",
+      "size": 97529948,
+      "url": "https://vshunt.oss-cn-guangzhou.aliyuncs.com/VShunt-1.0.3-b4-windows-x64.exe"
     },
     {
       "kind": "github",
-      "sha256": "890fa6d89b1c4d18d47fc8eea4c062f281174cfdecb6919e60c5affd95da24bd",
-      "size": 97135008,
-      "url": "https://github.com/timehijack/VShunt/releases/download/v1.0.2/VShunt-1.0.2-b3-windows-x64.exe"
+      "sha256": "5215f946d7c6593d152f1b14847e9a686bf917fb66b946a2f7ed733c37e82228",
+      "size": 97529948,
+      "url": "https://github.com/timehijack/VShunt/releases/download/v1.0.3/VShunt-1.0.3-b4-windows-x64.exe"
     }
   ],
   "notes": {
     "en": [
-      "This release brings Windows delivery up to date: group segments from A to Z, confirm where files go and how they are archived before export, and let folders build themselves — plus fixes for list scrolling and a new way to delete cut points.",
-      "Confirm before export: batch, single-segment and audio exports all open Export Settings first; default paths are unchanged, so existing projects need no setup",
-      "Automatic archiving: turn on Group by segment and Archive by spec, and groups plus each spec get their own folders — no manual sorting",
-      "Preview before you export: the right side shows how many folders and files will be created; an unwritable folder is flagged and export is blocked",
-      "Segment groups: 26 colored letter tags from A to Z; open the 26-cell grid to click a letter or just press A-Z; colors and export folder names are editable",
-      "New Export Archive settings: edit all 26 group colors and folder names, plus master, audio and every resolution spec folder name; duplicates, illegal characters and Windows reserved names are rejected",
-      "Group tags in receipts: every finished file shows its group letter, and Open Folder goes straight to the export root",
-      "Fixed: renaming, discarding or changing a segment\u0027s export settings no longer scrolls the list back to the top",
-      "Now possible: delete cut points straight from the segment and subtitle lists, with a confirmation that says which side is kept"
+      "This release is about the interface: the segment list and subtitle panel are redesigned to feel cleaner and more direct, and a step-by-step Volcengine setup guide is new.",
+      "Segment list: adapts to its own width — one full row when there is room, two compact rows when there isn\u0027t, and it stays comfortable in a sidebar",
+      "Merge preview: deleting a cut point or merging segments shows the outcome first — which segment stays, which is absorbed, and the resulting duration — before you confirm",
+      "Header stats: the top of the list shows remaining duration and utilization",
+      "Subtitle panel: action buttons keep their position; with no subtitles you get clear starting points — recognize, import or manual recognition — and a failed load can be reloaded",
+      "Subtitle labels: rows gain gender and emotion markers and colored speaker chips, and the point-of-interest list follows the same style",
+      "Subtitle info: the dialog now shows language, timing granularity and supported capabilities",
+      "Volcengine guide: a setup guide opens in your default browser from Settings, and its language follows the app",
+      "Settings reordered: storage is merged into one card with advanced options folded away, and the region defaults to Guangzhou",
+      "Export Archive: click a group letter swatch to change its color",
+      "Trial expiry: downloads now go to the official website"
     ],
     "ja": [
-      "このバージョンで Windows の書き出しと納品がそろいました：A〜Z のセグメントグループ、書き出し前の保存先と整理方法の確認、フォルダの自動生成。リストが先頭に戻る問題も直し、リストからカット点を削除できるようにしました。",
-      "書き出し前に確認：一括・単段・音声の書き出しはすべて「書き出し設定」を先に開きます。既定の保存先は変わらず、既存プロジェクトの設定変更は不要です",
-      "自動で整理：「グループごとに書き出し」「仕様ごとに整理」をオンにすると、グループと仕様ごとにフォルダが作られ、手作業の整理が要りません",
-      "書き出す前に確認：右側にフォルダ数とファイル数をプレビュー。書き込みできないフォルダはその場で警告し、書き出しを止めます",
-      "セグメントグループ：A〜Z の 26 グループに色付きの英字タグ。26 マスのパネルはクリックでも A〜Z キーでも選択でき、色と書き出し先フォルダ名も変更できます",
-      "設定に「書き出しアーカイブ」を追加：26 グループの色とフォルダ名、マスター / 音声 / 各解像度のフォルダ名を変更でき、重複名、使用できない文字、Windows の予約名は保存できません",
-      "完了一覧にグループ表示：各ファイルにグループの英字が付き、「フォルダを開く」で書き出し元フォルダが開きます",
-      "修正：名前変更、破棄、書き出し設定の変更をしても、セグメントリストが先頭に戻らなくなりました",
-      "補完：セグメントリストと字幕リストからカット点を直接削除でき、確認ダイアログに残す側が表示されます"
+      "このバージョンは UI の再設計が中心です。セグメントリストと字幕パネルを作り直し、見た目がすっきりして操作もより直感的になりました。あわせて火山引擎（Volcengine）の設定ガイドも追加しています。",
+      "セグメントリスト：幅に応じて自動で切り替わり、広いときは 1 行、狭いときは 2 行。サイドバーでも窮屈になりません",
+      "結合プレビュー：カット点の削除や結合の前に、残す側・統合される側・結合後の長さを確認してから実行できます",
+      "上部統計：リスト上部に残り時間と使用率を表示します",
+      "字幕操作：ボタンの位置は固定。字幕がないときは認識・読み込み・手動認識などの導線を直接表示し、読み込みに失敗した場合は再読み込みできます",
+      "字幕ラベル：性別・感情のアイコンと色付きの話者タグを追加。興味ポイント一覧も同じ表示になりました",
+      "字幕情報：言語、時間粒度、対応している機能をダイアログで確認できます",
+      "火山引擎ガイド：設定からガイドを開くと既定のブラウザーで表示され、ページの言語は UI に合わせて切り替わります",
+      "設定の再構成：認識設定の順序を整理し、ストレージ設定を 1 枚のカードに統合して「詳細オプション」を追加。リージョンは既定で広州です",
+      "書き出しアーカイブ：グループの英字色をクリックして色を変更できます",
+      "試用期限切れページ：ダウンロード先を公式サイトに統一しました"
     ],
     "ko": [
-      "이번 버전에서 Windows의 내보내기와 전달이 완성되었습니다: A~Z 세그먼트 그룹, 내보내기 전 저장 위치와 정리 방식 확인, 폴더 자동 생성까지 됩니다. 목록이 맨 위로 돌아가던 문제도 고치고, 목록에서 컷 지점을 삭제할 수 있게 했습니다.",
-      "내보내기 전 확인: 일괄, 단일 구간, 오디오 내보내기 모두 \u0027내보내기 설정\u0027을 먼저 엽니다. 기본 경로는 그대로라 기존 프로젝트는 설정할 것이 없습니다",
-      "자동 정리: \u0027그룹별로 내보내기\u0027, \u0027규격별로 정리\u0027를 켜면 그룹과 규격마다 폴더가 생겨 직접 정리할 필요가 없습니다",
-      "내보내기 전 미리보기: 오른쪽에서 폴더 수와 파일 수를 미리 확인하고, 쓸 수 없는 폴더는 그 자리에서 경고하며 내보내기를 막습니다",
-      "세그먼트 그룹: A~Z 26개 그룹에 색상 있는 알파벳 태그. 26칸 창은 클릭하거나 A~Z 키로 선택할 수 있고, 색상과 내보내기 폴더 이름도 바꿀 수 있습니다",
-      "설정에 \u0027내보내기 아카이브\u0027 추가: 26개 그룹의 색상과 폴더 이름, 마스터 / 오디오 / 각 해상도 폴더 이름을 바꿀 수 있고, 중복 이름, 사용할 수 없는 문자, Windows 예약 이름은 저장되지 않습니다",
-      "완료 목록에 그룹 표시: 각 파일에 그룹 알파벳이 붙고, \u0027폴더 열기\u0027는 내보내기 루트 폴더를 엽니다",
-      "수정: 이름 변경, 폐기, 내보내기 설정 변경 후에도 세그먼트 목록이 맨 위로 돌아가지 않습니다",
-      "보완: 세그먼트 목록과 자막 목록에서 컷 지점을 바로 삭제할 수 있고, 확인 창에 남길 쪽이 표시됩니다"
+      "이번 버전은 UI 재설계가 중심입니다. 세그먼트 목록과 자막 패널을 새로 만들어 화면이 더 깔끔해지고 조작이 더 직관적이 되었습니다. 함께 Volcengine 설정 가이드도 추가했습니다.",
+      "세그먼트 목록: 너비에 따라 자동으로 전환되어 넓을 때는 한 줄, 좁을 때는 두 줄로 표시하며 사이드바에서도 답답하지 않습니다",
+      "병합 미리보기: 컷 포인트 삭제나 병합 전에 남는 쪽, 합쳐지는 쪽, 병합 후 길이를 먼저 확인한 뒤 실행합니다",
+      "상단 통계: 목록 상단에 남은 시간과 사용률을 표시합니다",
+      "자막 조작: 버튼 위치는 고정. 자막이 없을 때는 인식, 가져오기, 수동 인식 등의 진입점을 바로 보여 주며, 불러오기에 실패하면 다시 불러올 수 있습니다",
+      "자막 라벨: 성별·감정 아이콘과 색상 있는 화자 태그를 추가했고, 관심 지점 목록도 같은 스타일을 따릅니다",
+      "자막 정보: 언어, 시간 단위, 지원 기능을 대화 상자에서 확인할 수 있습니다",
+      "Volcengine 가이드: 설정에서 가이드를 열면 기본 브라우저로 표시되고 페이지 언어는 UI를 따릅니다",
+      "설정 재구성: 인식 설정 순서를 정리하고 저장 설정을 한 장의 카드로 통합하며 \u0027고급 옵션\u0027을 추가했습니다. 리전 기본값은 광저우입니다",
+      "내보내기 아카이브: 그룹 알파벳 색상을 클릭해 색을 바꿀 수 있습니다",
+      "체험 만료 페이지: 다운로드 진입점을 공식 사이트로 통일했습니다"
     ],
     "ru": [
-      "В этом выпуске Windows получил полный цикл экспорта: группы сегментов от A до Z, подтверждение папки и способа архивации перед экспортом и автоматическое создание папок. Заодно исправлена прокрутка списка и добавлено удаление точек разреза.",
-      "Подтверждение перед экспортом: пакетный, одиночный и аудиоэкспорт сначала открывают «Настройки экспорта». Путь по умолчанию не изменился, старые проекты настраивать не нужно",
-      "Автоматическая архивация: включите «Экспорт по группам» и «Архивировать по спецификациям» — группы и каждая спецификация получат свои папки, сортировать вручную не нужно",
-      "Предпросмотр до экспорта: справа видно, сколько папок и файлов появится; недоступная для записи папка отмечается сразу, и экспорт блокируется",
-      "Группы сегментов: 26 групп от A до Z с цветными буквенными метками. Сетку из 26 ячеек можно выбирать мышью или клавишами A-Z; цвета и имена папок экспорта редактируются",
-      "Новая страница «Архив экспорта»: цвета и имена папок всех 26 групп, а также папки мастера, аудио и каждого пресета разрешения; повторы, недопустимые символы и зарезервированные имена Windows не сохраняются",
-      "Группы в списке завершения: у каждого файла указана буква группы, а «Открыть папку» ведёт в корень экспорта",
-      "Исправлено: после переименования, отказа от сегмента или изменения настроек экспорта список больше не прокручивается к началу",
-      "Дополнено: точку разреза можно удалить прямо в списке сегментов и субтитров, а подтверждение показывает, какая сторона сохраняется"
+      "Главное в этом выпуске — обновлённый интерфейс. Список сегментов и панель субтитров перерисованы: выглядит чище, работать удобнее. Также добавлена пошаговая инструкция по настройке Volcengine.",
+      "Список сегментов: подстраивается под ширину — в широком виде всё в одну строку, в узком складывается в две, и в боковой панели не тесно",
+      "Предпросмотр объединения: перед удалением точки разреза или объединением видно, какой сегмент остаётся, какой присоединяется и какой будет длина; действие выполняется после подтверждения",
+      "Статистика в шапке: сверху видно остаток длительности и коэффициент использования",
+      "Панель субтитров: кнопки не смещаются; без субтитров сразу предлагаются распознавание, импорт и ручное распознавание, а при ошибке загрузки можно повторить её",
+      "Метки субтитров: в строках появились значки пола и эмоций, цветные метки говорящего; список интересов оформлен так же",
+      "Информация о субтитрах: в окне видны язык, гранулярность времени и поддерживаемые возможности",
+      "Инструкция Volcengine: из настроек открывается в браузере по умолчанию, язык страницы следует за интерфейсом",
+      "Настройки: хранилище объединено в одну карточку, добавлены «Расширенные настройки», регион по умолчанию — Гуанчжоу",
+      "Архив экспорта: цвет группы меняется щелчком по буквенному блоку",
+      "Страница окончания пробного периода: ссылка на загрузку ведёт на официальный сайт"
     ],
     "zh-Hans": [
-      "这一版补齐了 Windows 的导出交付：片段可按 A-Z 分组，导出前确认位置与归档，目录自动建好；顺手修好了列表滚回顶部的问题，补上了在列表里删切点的入口。",
-      "导出前先确认：批量、单段、音频导出都会先弹「导出设置」，默认路径不变，老工程不用改",
-      "自动归档：勾「按分组导出」「按规格归档」，同组片段和每条规格各自进目录，交付不用手动整理",
-      "目录先看后导：右侧预览会生成几个目录、每个几个文件；目录不可写当场提示并挡住导出",
-      "片段分组：A-Z 26 组彩色字母标签，点开 26 宫格可鼠标点选或直接按字母，颜色和导出目录名都能改",
-      "设置新增「导出归档」：26 组配色与目录名、母版 / 音频 / 各分辨率规格目录名都能改，重名、非法字符和 Windows 保留名会被拦下",
-      "导出清单带分组：每条明细标出分组字母，「打开目录」直达导出根目录",
-      "修复：改名、废弃、改导出设置后，片段列表不再跳回顶部，滚动位置保留",
-      "补齐：片段列表和字幕列表可以直接删切点，确认框写明保留前一段还是后一段"
+      "这一版着重重新设计了界面：片段列表与字幕面板都换了一版，整体观感更干净，操作也更顺手；同时新增火山引擎的配置引导。",
+      "片段列表：按自身宽度自适应，宽时一行看全、窄时收成两行，放在侧栏也不挤",
+      "合并预演：删除切点、合并片段前先看到结果——哪段保留、哪段并入、合并后多长，确认后执行",
+      "头部统计：列表顶部显示剩余时长与利用率",
+      "字幕交互：按钮位置固定；没有字幕时直接给出识别、导入、手动识别等上手路径，加载失败可重新加载",
+      "字幕标识：字幕行新增性别与情绪标识、彩色说话人标签，兴趣点列表同步",
+      "字幕信息：弹窗可查看语言、时间粒度与支持的能力",
+      "火山引擎引导：设置页新增配置引导，用系统默认浏览器打开，页面语言跟随界面",
+      "设置重排：识别设置页顺序重排，存储设置合并为一张卡并新增「高级选项」，区域默认广州",
+      "导出归档：点击分组字母色块即可改颜色",
+      "试用到期页：下载入口统一走官网"
     ]
   },
   "platform": "windows",
-  "publishedAt": "2026-11-25T01:17:52Z",
+  "publishedAt": "2026-11-27T04:36:45Z",
   "schema": 3,
-  "version": "1.0.2"
+  "version": "1.0.3"
 }
